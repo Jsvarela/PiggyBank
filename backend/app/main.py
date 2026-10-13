@@ -7,7 +7,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.errors import Conflict, DomainError, NotFound
 from app.ratelimit import limiter
-from app.routers import auth, catalog, transactions
+from app.routers import auth, budgets, catalog, transactions
 from app.services.auth import RegistrationClosed
 
 app = FastAPI(title="Finanzas")
@@ -35,5 +35,5 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-for r in (auth.router, catalog.router, transactions.router):
+for r in (auth.router, catalog.router, transactions.router, budgets.router):
     app.include_router(r, prefix="/api")

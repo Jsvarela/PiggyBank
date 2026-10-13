@@ -81,6 +81,31 @@ class Category(Base):
     archived: Mapped[bool] = mapped_column(default=False)
 
 
+class Budget(Base):
+    """Límite mensual de gasto por categoría.
+
+    `is_default` = se repite cada mes; una fila con `month` ("YYYY-MM") reemplaza al default
+    solo en ese mes. La unicidad (categoría, mes|default) la garantiza el upsert del servicio.
+    """
+
+    __tablename__ = "budgets"
+    __table_args__ = (
+        CheckConstraint("limit_amount > 0", name="limit_positive"),
+        CheckConstraint("alert_threshold BETWEEN 1 AND 100", name="threshold_range"),
+        CheckConstraint(
+            "(is_default AND month IS NULL) OR (NOT is_default AND month IS NOT NULL)",
+            name="default_or_month",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+    month: Mapped[str | None] = mapped_column(String(7))
+    is_default: Mapped[bool] = mapped_column(default=False)
+    limit_amount: Mapped[int] = mapped_column(BigInteger)
+    alert_threshold: Mapped[int] = mapped_column(default=80)
+
+
 class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = (

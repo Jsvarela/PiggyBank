@@ -1,4 +1,5 @@
 import { useDashboard } from '../api/hooks'
+import BudgetAlerts from '../components/BudgetAlerts'
 import TransactionRow from '../components/TransactionRow'
 import { formatCOP } from '../lib/money'
 
@@ -10,6 +11,7 @@ export default function Home() {
   const accounts = data.accounts.filter((a) => !a.archived || a.balance !== 0)
   return (
     <div className="space-y-4">
+      <BudgetAlerts />
       <section className="rounded-xl bg-white p-4 shadow-sm">
         <p className="text-sm text-slate-500">Patrimonio total</p>
         <p className="text-3xl font-semibold">{formatCOP(data.net_worth)}</p>

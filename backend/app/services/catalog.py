@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.errors import Conflict, DomainError, NotFound
-from app.models import Account, Category, Transaction
+from app.models import Account, Budget, Category, Transaction
 from app.schemas import AccountIn, CategoryIn
 
 
@@ -55,9 +55,13 @@ def save_category(db: Session, data: CategoryIn, category: Category | None = Non
 
 
 def delete_category(db: Session, category: Category) -> None:
-    if _has_transactions(db, Transaction.category_id == category.id) or db.scalar(
-        select(Category.id).where(Category.parent_id == category.id).limit(1)
+    if (
+        _has_transactions(db, Transaction.category_id == category.id)
+        or db.scalar(select(Category.id).where(Category.parent_id == category.id).limit(1))
+        or db.scalar(select(Budget.id).where(Budget.category_id == category.id).limit(1))
     ):
-        raise Conflict("La categoría tiene movimientos o subcategorías: archívala en vez de borrarla")
+        raise Conflict(
+            "La categoría tiene movimientos, subcategorías o presupuestos: archívala en vez de borrarla"
+        )
     db.delete(category)
     db.commit()

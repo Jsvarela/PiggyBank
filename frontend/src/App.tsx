@@ -4,6 +4,7 @@ import { ApiError } from './api/client'
 import { useMe } from './api/hooks'
 import Layout from './components/Layout'
 import Accounts from './pages/Accounts'
+import Budgets from './pages/Budgets'
 import Categories from './pages/Categories'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -22,6 +23,7 @@ function Gate() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/movimientos" element={<Transactions />} />
+        <Route path="/presupuestos" element={<Budgets />} />
         <Route path="/cuentas" element={<Accounts />} />
         <Route path="/categorias" element={<Categories />} />
       </Route>

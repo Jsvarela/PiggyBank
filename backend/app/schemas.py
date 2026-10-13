@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
@@ -86,6 +87,57 @@ class TransactionOut(BaseModel):
 class TransactionPage(BaseModel):
     items: list[TransactionOut]
     total: int
+
+
+MONTH = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+
+class BudgetIn(BaseModel):
+    category_id: int
+    month: str | None = Field(default=None, pattern=MONTH)  # None = se repite cada mes
+    limit_amount: StrictInt = Field(gt=0)
+    alert_threshold: StrictInt = Field(default=80, ge=1, le=100)
+
+
+class BudgetOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    category_id: int
+    month: str | None
+    is_default: bool
+    limit_amount: int
+    alert_threshold: int
+
+
+class BudgetStatus(BaseModel):
+    budget_id: int
+    category_id: int
+    category_name: str
+    is_default: bool
+    limit: int
+    alert_threshold: int
+    spent: int
+    percent: int
+    remaining: int  # negativo si se pasó
+    alert: Literal["ok", "warning", "exceeded"]
+    days_left: int
+
+
+class CategorySpend(BaseModel):
+    category_id: int
+    name: str
+    amount: int
+    previous: int
+    diff: int
+
+
+class MonthlyReport(BaseModel):
+    month: str
+    income: int
+    expense: int
+    previous_income: int
+    previous_expense: int
+    categories: list[CategorySpend]
 
 
 class Dashboard(BaseModel):

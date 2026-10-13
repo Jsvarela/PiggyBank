@@ -9,6 +9,7 @@ import QuickAdd from './QuickAdd'
 const links = [
   ['/', 'Inicio'],
   ['/movimientos', 'Movimientos'],
+  ['/presupuestos', 'Presupuestos'],
   ['/cuentas', 'Cuentas'],
   ['/categorias', 'Categorías'],
 ] as const
@@ -51,7 +52,7 @@ export default function Layout() {
               key={to}
               to={to}
               end
-              className={({ isActive }) => `flex-1 py-3 text-center text-sm ${isActive ? 'font-semibold text-emerald-700' : 'text-slate-600'}`}
+              className={({ isActive }) => `flex-1 py-3 text-center text-xs ${isActive ? 'font-semibold text-emerald-700' : 'text-slate-600'}`}
             >
               {label}
             </NavLink>

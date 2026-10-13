@@ -74,3 +74,33 @@ export interface TransactionFilters {
   limit: number
   offset: number
 }
+
+export interface BudgetStatus {
+  budget_id: number
+  category_id: number
+  category_name: string
+  is_default: boolean
+  limit: number
+  alert_threshold: number
+  spent: number
+  percent: number
+  remaining: number
+  alert: 'ok' | 'warning' | 'exceeded'
+  days_left: number
+}
+
+export interface BudgetBody {
+  category_id: number
+  month: string | null
+  limit_amount: number
+  alert_threshold: number
+}
+
+export interface MonthlyReport {
+  month: string
+  income: number
+  expense: number
+  previous_income: number
+  previous_expense: number
+  categories: { category_id: number; name: string; amount: number; previous: number; diff: number }[]
+}

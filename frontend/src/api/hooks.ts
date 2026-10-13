@@ -1,6 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { Account, Category, Dashboard, Transaction, TransactionFilters, User } from './types'
+import type {
+  Account,
+  BudgetStatus,
+  Category,
+  Dashboard,
+  MonthlyReport,
+  Transaction,
+  TransactionFilters,
+  User,
+} from './types'
 
 export const useMe = () => useQuery({ queryKey: ['me'], queryFn: () => api<User>('/auth/me'), retry: false })
 export const useAccounts = () => useQuery({ queryKey: ['accounts'], queryFn: () => api<Account[]>('/accounts') })
@@ -26,3 +35,8 @@ export function useApiMutation<B = void>(method: string, path: (body: B) => stri
     onSuccess: () => qc.invalidateQueries(),
   })
 }
+
+export const useBudgetStatus = (month?: string) =>
+  useQuery({ queryKey: ['budget-status', month], queryFn: () => api<BudgetStatus[]>(`/budgets/status${month ? `?month=${month}` : ''}`) })
+export const useMonthlyReport = (month: string) =>
+  useQuery({ queryKey: ['monthly-report', month], queryFn: () => api<MonthlyReport>(`/reports/monthly?month=${month}`) })
