@@ -9,6 +9,8 @@ Requisitos: [uv](https://docs.astral.sh/uv/) y Node 20+.
 # Backend (http://localhost:8000, docs en /docs)
 cd backend
 cp .env.example .env
+uv run alembic upgrade head          # crea las tablas
+uv run python -m app.seed            # categorías por defecto (--demo agrega datos de ejemplo)
 uv run uvicorn app.main:app --reload
 
 # Frontend (http://localhost:5173, proxy de /api al backend)

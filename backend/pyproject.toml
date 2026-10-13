@@ -30,3 +30,7 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 100
 
+exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+ignore = ["B008"]  # Depends() en argumentos es el patron de FastAPI
