@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -7,8 +9,9 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.errors import Conflict, DomainError, NotFound
 from app.ratelimit import limiter
-from app.routers import auth, budgets, catalog, goals, recurring, transactions
+from app.routers import auth, budgets, catalog, export, goals, recurring, transactions
 from app.services.auth import RegistrationClosed
+from app.spa import mount_frontend
 
 app = FastAPI(title="Finanzas")
 app.state.limiter = limiter
@@ -36,6 +39,11 @@ def health() -> dict[str, str]:
 
 
 for r in (
-    auth.router, catalog.router, transactions.router, budgets.router, recurring.router, goals.router
+    auth.router, catalog.router, transactions.router, budgets.router, recurring.router, goals.router,
+    export.router,
 ):
     app.include_router(r, prefix="/api")
+
+# debe ir al final: la ruta comodín del frontend no puede tapar a la API
+if settings.static_dir:
+    mount_frontend(app, Path(settings.static_dir))

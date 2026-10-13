@@ -5,7 +5,7 @@ export const ACCOUNT_TYPES: Record<AccountType, string> = {
   cash: 'Efectivo',
   bank: 'Banco',
   digital_wallet: 'Billetera digital',
-  credit_card: 'Tarjeta de crÃ©dito',
+  credit_card: 'Tarjeta de crédito',
   savings: 'Ahorros',
 }
 

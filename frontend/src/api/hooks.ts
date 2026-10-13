@@ -30,7 +30,7 @@ export function useTransactions(f: TransactionFilters) {
   })
 }
 
-/** Cualquier cambio invalida todo: son pocos datos y asÃ­ los saldos nunca quedan viejos. */
+/** Cualquier cambio invalida todo: son pocos datos y así los saldos nunca quedan viejos. */
 export function useApiMutation<B = void>(method: string, path: (body: B) => string) {
   const qc = useQueryClient()
   return useMutation({

@@ -19,6 +19,9 @@ npm install
 npm run dev
 ```
 
+## Despliegue
+Ver [DEPLOY.md](DEPLOY.md): Render + Neon, gratis, un solo servicio.
+
 ## Tests y linters
 ```bash
 cd backend && uv run pytest && uv run ruff check .
