@@ -23,7 +23,7 @@ export default function InstallApp() {
   }, [])
 
   return (
-    <section className="rounded-xl bg-white p-4 shadow-sm">
+    <section className="rounded-xl bg-surface p-4 shadow-sm">
       <h2 className="mb-1 font-medium">Instalar app</h2>
       {isStandalone() ? (
         <p className="text-sm text-slate-600">Ya estás usando la app instalada.</p>

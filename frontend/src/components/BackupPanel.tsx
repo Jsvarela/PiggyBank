@@ -23,7 +23,7 @@ export default function BackupPanel() {
   }
 
   return (
-    <section className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+    <section className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
       <h2 className="font-medium">Respaldo y exportación</h2>
       <a className={link} href="/api/export/backup.json" download>
         Descargar respaldo completo (JSON)

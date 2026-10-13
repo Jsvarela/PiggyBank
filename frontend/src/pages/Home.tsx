@@ -13,23 +13,23 @@ export default function Home() {
   return (
     <div className="space-y-4">
       <BudgetAlerts />
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         <p className="text-sm text-slate-500">Patrimonio total</p>
         <p className="text-3xl font-semibold">{formatCOP(data.net_worth)}</p>
       </section>
 
       <section className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-white p-3 shadow-sm">
+        <div className="rounded-xl bg-surface p-3 shadow-sm">
           <p className="text-sm text-slate-500">Ingresos de {data.month}</p>
           <p className="text-lg text-emerald-700">{formatCOP(data.income)}</p>
         </div>
-        <div className="rounded-xl bg-white p-3 shadow-sm">
+        <div className="rounded-xl bg-surface p-3 shadow-sm">
           <p className="text-sm text-slate-500">Gastos de {data.month}</p>
           <p className="text-lg text-red-700">{formatCOP(data.expense)}</p>
         </div>
       </section>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Cuentas</h2>
         {accounts.length === 0 && <p className="text-sm text-slate-500">Crea tu primera cuenta en la pestaña Cuentas.</p>}
         <ul className="divide-y">
@@ -42,12 +42,12 @@ export default function Home() {
         </ul>
       </section>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Próximos pagos</h2>
         <UpcomingList limit={5} />
       </section>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Últimos movimientos</h2>
         {data.recent.length === 0 && <p className="text-sm text-slate-500">Aún no hay movimientos. Usa el botón +.</p>}
         <ul className="divide-y">

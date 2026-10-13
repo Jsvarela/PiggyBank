@@ -37,6 +37,18 @@ def save_transaction(
     return tx
 
 
+def save_transactions(db: Session, items: list[TransactionIn]) -> int:
+    """Crea varios movimientos de una vez: o entran todos o no entra ninguno."""
+    for data in items:
+        check_refs(db, data)
+    for data in items:
+        values = data.model_dump(exclude={"id"})
+        values["date"] = data.date or today_bogota()
+        db.add(Transaction(**({"id": data.id} if data.id else {}), **values))
+    db.commit()
+    return len(items)
+
+
 def list_transactions(
     db: Session,
     *,

@@ -23,7 +23,7 @@ function CategoryForm({ category, onDone }: { category?: Category; onDone: () =>
   })
 
   return (
-    <form onSubmit={handleSubmit((v) => save.mutate(v, { onSuccess: onDone }))} className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+    <form onSubmit={handleSubmit((v) => save.mutate(v, { onSuccess: onDone }))} className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
       <input placeholder="Nombre" className="w-full rounded-lg border border-slate-300 p-2" {...register('name')} />
       {formState.errors.name && <p className="text-sm text-red-600">{formState.errors.name.message}</p>}
       <select className="w-full rounded-lg border border-slate-300 p-2" {...register('kind')}>
@@ -73,7 +73,7 @@ export default function Categories() {
       <button className="w-full rounded-lg bg-emerald-600 py-2 text-white" onClick={() => setEditing(null)}>
         Nueva categoría
       </button>
-      <ul className="divide-y rounded-xl bg-white px-4 shadow-sm">
+      <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {categories.map((c) => (
           <li key={c.id}>
             <button className="flex w-full justify-between py-3 text-left" onClick={() => setEditing(c)}>

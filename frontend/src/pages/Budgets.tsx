@@ -41,7 +41,7 @@ function BudgetForm({ month, item, onDone }: { month: string; item?: BudgetStatu
   return (
     <form
       onSubmit={handleSubmit(({ repeat, ...v }) => save.mutate({ ...v, month: repeat ? null : month }, { onSuccess: onDone }))}
-      className="space-y-2 rounded-xl bg-white p-4 shadow-sm"
+      className="space-y-2 rounded-xl bg-surface p-4 shadow-sm"
     >
       {item ? (
         <p className="text-lg font-medium">{item.category_name}</p>
@@ -110,7 +110,7 @@ export default function Budgets() {
       <section className="space-y-3">
         {status.length === 0 && <p className="text-sm text-slate-500">Sin presupuestos para este mes.</p>}
         {status.map((b) => (
-          <button key={b.budget_id} className="block w-full rounded-xl bg-white p-3 text-left shadow-sm" onClick={() => setEditing(b)}>
+          <button key={b.budget_id} className="block w-full rounded-xl bg-surface p-3 text-left shadow-sm" onClick={() => setEditing(b)}>
             <div className="flex justify-between">
               <span>{b.category_name}</span>
               <span className="text-sm text-slate-600">
@@ -129,7 +129,7 @@ export default function Budgets() {
       </section>
 
       {report && (
-        <section className="rounded-xl bg-white p-4 shadow-sm">
+        <section className="rounded-xl bg-surface p-4 shadow-sm">
           <h2 className="mb-1 font-medium">Resumen del mes</h2>
           <p className="mb-2 text-sm text-slate-600">
             Gastos {formatCOP(report.expense)} (mes anterior {formatCOP(report.previous_expense)}) · Ingresos {formatCOP(report.income)}

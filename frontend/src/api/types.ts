@@ -158,3 +158,33 @@ export interface Goal extends GoalBody {
   reached: boolean
   monthly_suggested: number | null
 }
+
+export interface CsvMapping {
+  date_col: number
+  description_col: number | null
+  amount_col: number | null
+  debit_col: number | null
+  credit_col: number | null
+  date_format: 'dmy' | 'mdy' | 'ymd'
+  decimal: ',' | '.'
+  invert_sign: boolean
+  has_header: boolean
+}
+
+export interface PreviewRow {
+  line: number
+  date: string | null
+  amount: number | null
+  type: 'income' | 'expense' | null
+  description: string
+  duplicate: boolean
+  error: string | null
+}
+
+export interface StatementPreview {
+  delimiter: string
+  headers: string[]
+  sample: string[][]
+  suggested: CsvMapping | null
+  rows: PreviewRow[]
+}

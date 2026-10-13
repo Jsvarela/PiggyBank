@@ -1,1 +1,32 @@
 @import 'tailwindcss';
+
+/* "surface" = fondo de tarjetas y barras (antes bg-white). No se redefine --color-white
+   porque los botones verdes necesitan seguir con texto blanco en modo oscuro. */
+@theme {
+  --color-surface: #ffffff;
+}
+
+/* Modo oscuro: las utilidades de Tailwind leen estas variables, así que basta con
+   redefinir la paleta una vez en vez de agregar `dark:` a cada elemento. */
+.dark {
+  color-scheme: dark; /* selectores de fecha, listas y barras de scroll nativas */
+  --color-surface: #1e293b;
+  --color-slate-50: #0f172a;
+  --color-slate-200: #334155;
+  --color-slate-300: #475569;
+  --color-slate-500: #94a3b8;
+  --color-slate-600: #cbd5e1;
+  --color-slate-900: #f1f5f9;
+  --color-emerald-700: #34d399;
+  --color-red-600: #f87171;
+  --color-red-700: #f87171;
+  --color-amber-50: #451a03;
+  --color-amber-300: #b45309;
+  --color-amber-700: #fbbf24;
+  --color-amber-800: #fcd34d;
+}
+
+body {
+  background: var(--color-slate-50);
+  color: var(--color-slate-900);
+}

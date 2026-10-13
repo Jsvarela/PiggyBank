@@ -30,7 +30,7 @@ function GoalForm({ goal, onDone }: { goal?: Goal; onDone: () => void }) {
   return (
     <form
       onSubmit={handleSubmit((v) => save.mutate({ ...v, deadline: v.deadline || null }, { onSuccess: onDone }))}
-      className="space-y-2 rounded-xl bg-white p-4 shadow-sm"
+      className="space-y-2 rounded-xl bg-surface p-4 shadow-sm"
     >
       <input placeholder="Nombre de la meta (Viaje, Moto…)" className={field} {...register('name')} />
       {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
@@ -124,7 +124,7 @@ export default function Goals() {
       </button>
       {goals.length === 0 && <p className="text-sm text-slate-500">Aún no tienes metas de ahorro.</p>}
       {goals.map((g) => (
-        <section key={g.id} className="rounded-xl bg-white p-4 shadow-sm">
+        <section key={g.id} className="rounded-xl bg-surface p-4 shadow-sm">
           <div className="flex justify-between">
             <button className="font-medium" onClick={() => setEditing(g)}>
               {g.name}

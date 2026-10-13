@@ -1,17 +1,19 @@
 import { Link } from 'react-router-dom'
 import BackupPanel from '../components/BackupPanel'
 import InstallApp from '../components/InstallApp'
+import ThemeToggle from '../components/ThemeToggle'
 
 const links = [
   ['/recurrentes', 'Recurrentes', 'Arriendo, Netflix, salario y próximos pagos'],
   ['/cuentas', 'Cuentas', 'Efectivo, bancos, billeteras y tarjetas'],
   ['/categorias', 'Categorías', 'Organiza tus ingresos y gastos'],
+  ['/importar', 'Importar extracto', 'Carga movimientos desde un CSV de tu banco'],
 ] as const
 
 export default function More() {
   return (
     <div className="space-y-4">
-      <ul className="divide-y rounded-xl bg-white px-4 shadow-sm">
+      <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {links.map(([to, title, hint]) => (
           <li key={to}>
             <Link to={to} className="block py-3">
@@ -21,6 +23,7 @@ export default function More() {
           </li>
         ))}
       </ul>
+      <ThemeToggle />
       <InstallApp />
       <BackupPanel />
     </div>

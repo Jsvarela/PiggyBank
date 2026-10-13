@@ -1,6 +1,7 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -36,8 +37,21 @@ def list_transactions(
 
 
 @router.post("/transactions", status_code=201, response_model=TransactionOut, tags=["transactions"])
-def create_transaction(body: TransactionIn, db: Session = Depends(get_db)):
+def create_transaction(body: TransactionIn, response: Response, db: Session = Depends(get_db)):
+    # mismo id = mismo movimiento: el modo offline reintenta envíos cuya respuesta pudo perderse
+    if body.id and (existing := db.get(Transaction, body.id)):
+        response.status_code = 200
+        return existing
     return transactions.save_transaction(db, body)
+
+
+class BulkIn(BaseModel):
+    items: list[TransactionIn] = Field(max_length=1000)
+
+
+@router.post("/transactions/bulk", status_code=201, tags=["transactions"])
+def create_transactions(body: BulkIn, db: Session = Depends(get_db)) -> dict[str, int]:
+    return {"created": transactions.save_transactions(db, body.items)}
 
 
 @router.put("/transactions/{id}", response_model=TransactionOut, tags=["transactions"])

@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import settings
 from app.errors import Conflict, DomainError, NotFound
 from app.ratelimit import limiter
-from app.routers import auth, budgets, catalog, export, goals, recurring, transactions
+from app.routers import auth, budgets, catalog, export, goals, recurring, statement, transactions
 from app.services.auth import RegistrationClosed
 from app.spa import mount_frontend
 
@@ -40,7 +40,7 @@ def health() -> dict[str, str]:
 
 for r in (
     auth.router, catalog.router, transactions.router, budgets.router, recurring.router, goals.router,
-    export.router,
+    export.router, statement.router,
 ):
     app.include_router(r, prefix="/api")
 

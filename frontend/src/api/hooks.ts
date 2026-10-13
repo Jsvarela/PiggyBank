@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from './client'
+import { setSession, readCache, writeCache } from '../lib/localCache'
+import { ApiError, api } from './client'
 import type {
   Account,
   BudgetStatus,
@@ -14,10 +15,36 @@ import type {
   User,
 } from './types'
 
-export const useMe = () => useQuery({ queryKey: ['me'], queryFn: () => api<User>('/auth/me'), retry: false })
-export const useAccounts = () => useQuery({ queryKey: ['accounts'], queryFn: () => api<Account[]>('/accounts') })
-export const useCategories = () =>
-  useQuery({ queryKey: ['categories'], queryFn: () => api<Category[]>('/categories') })
+export const useMe = () =>
+  useQuery({
+    queryKey: ['me'],
+    retry: false,
+    queryFn: async () => {
+      try {
+        const user = await api<User>('/auth/me')
+        setSession(true)
+        return user
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 401) setSession(false)
+        throw e
+      }
+    },
+  })
+
+/** Lista con copia local: sin red se usa la última conocida (y se sigue pidiendo al servidor). */
+const useCachedList = <T>(key: string, path: string) =>
+  useQuery({
+    queryKey: [key],
+    queryFn: async () => {
+      const data = await api<T[]>(path)
+      writeCache(key, data)
+      return data
+    },
+    initialData: () => readCache<T[]>(key),
+    initialDataUpdatedAt: 0, // la copia local se considera vieja: igual se refresca al montar
+  })
+export const useAccounts = () => useCachedList<Account>('accounts', '/accounts')
+export const useCategories = () => useCachedList<Category>('categories', '/categories')
 export const useDashboard = () => useQuery({ queryKey: ['dashboard'], queryFn: () => api<Dashboard>('/dashboard') })
 
 export function useTransactions(f: TransactionFilters) {

@@ -79,6 +79,19 @@ def test_filtros_y_paginacion(authed):
     assert get(account_id=b["id"])["total"] == 2
 
 
+def test_crear_con_el_mismo_id_es_idempotente(authed):
+    # el modo offline reintenta envíos cuya respuesta pudo perderse: no debe duplicar
+    a, cat = mk_account(authed), mk_category(authed)
+    body = {"id": "11111111-1111-4111-8111-111111111111", "type": "expense", "amount": 500,
+            "date": "2026-03-01", "account_id": a["id"], "category_id": cat["id"]}
+    first = authed.post("/api/transactions", json=body)
+    again = authed.post("/api/transactions", json=body)
+    assert (first.status_code, again.status_code) == (201, 200)
+    assert first.json()["id"] == again.json()["id"] == body["id"]
+    assert authed.get("/api/transactions").json()["total"] == 1
+    assert authed.get("/api/accounts").json()[0]["balance"] == 100_000 - 500
+
+
 def test_actualizar_y_borrar_movimiento(authed):
     a = mk_account(authed)
     cat = mk_category(authed)

@@ -82,7 +82,7 @@ function RuleForm({ rule, onDone }: { rule?: RecurringRule; onDone: () => void }
   })
 
   return (
-    <form onSubmit={onSubmit} className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+    <form onSubmit={onSubmit} className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
       <select aria-label="Tipo" className={field} {...register('type')}>
         {(Object.keys(TX_TYPES) as TxType[]).map((t) => (
           <option key={t} value={t}>
@@ -186,12 +186,12 @@ export default function Recurring() {
         Nueva regla recurrente
       </button>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Próximos 30 días</h2>
         <UpcomingList />
       </section>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Reglas</h2>
         {rules.length === 0 && <p className="text-sm text-slate-500">Aún no tienes reglas (arriendo, Netflix, salario…).</p>}
         <ul className="divide-y">

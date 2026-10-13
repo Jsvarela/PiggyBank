@@ -4,7 +4,7 @@ import { TX_TYPES, type TransactionFilters, type TxType } from '../api/types'
 import TransactionRow from '../components/TransactionRow'
 
 const PAGE = 20
-const input = 'rounded-lg border border-slate-300 bg-white p-2 text-sm'
+const input = 'rounded-lg border border-slate-300 bg-surface p-2 text-sm'
 
 export default function Transactions() {
   const [f, setF] = useState<TransactionFilters>({ limit: PAGE, offset: 0 })
@@ -49,7 +49,7 @@ export default function Transactions() {
         <input placeholder="Buscar texto" className={input} value={f.q ?? ''} onChange={(e) => set({ q: e.target.value || undefined })} />
       </div>
 
-      <section className="rounded-xl bg-white p-4 shadow-sm">
+      <section className="rounded-xl bg-surface p-4 shadow-sm">
         {data?.items.length === 0 && <p className="text-sm text-slate-500">Sin resultados.</p>}
         <ul className={`divide-y ${isFetching ? 'opacity-60' : ''}`}>
           {data?.items.map((t) => (

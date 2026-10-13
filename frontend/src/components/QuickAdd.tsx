@@ -1,9 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { api } from '../api/client'
 import { useAccounts, useApiMutation, useCategories } from '../api/hooks'
 import { TX_TYPES, type Transaction, type TransactionBody, type TxType } from '../api/types'
 import { todayBogota } from '../lib/dates'
+import { createTransaction } from '../lib/offlineQueue'
 
 const LAST_ACCOUNT = 'lastAccountId'
 
@@ -38,12 +41,20 @@ function lastAccount(): number | undefined {
 }
 
 const chip = (on: boolean) =>
-  `rounded-full border px-3 py-1.5 text-sm ${on ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-white'}`
+  `rounded-full border px-3 py-1.5 text-sm ${on ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-surface'}`
 
 export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: () => void }) {
   const accounts = (useAccounts().data ?? []).filter((a) => !a.archived)
   const categories = useCategories().data ?? []
-  const save = useApiMutation<TransactionBody>(tx ? 'PUT' : 'POST', () => (tx ? `/transactions/${tx.id}` : '/transactions'))
+  const qc = useQueryClient()
+  // crear puede quedar en cola si no hay conexión; editar y borrar siempre necesitan red
+  const save = useMutation({
+    mutationFn: (body: TransactionBody) => (tx ? api(`/transactions/${tx.id}`, { method: 'PUT', body }) : createTransaction(body)),
+    // sin `return`: no esperar el refresco, que sin conexión tarda en fallar y retrasaría cerrar la hoja
+    onSuccess: () => {
+      qc.invalidateQueries()
+    },
+  })
   const del = useApiMutation<string>('DELETE', (id) => `/transactions/${id}`)
 
   const { register, handleSubmit, watch, setValue, formState } = useForm<FormValues>({
@@ -92,7 +103,7 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
       <form
         onSubmit={onSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[92vh] w-full space-y-4 overflow-y-auto rounded-t-2xl bg-white p-4 sm:max-w-md sm:rounded-2xl"
+        className="max-h-[92vh] w-full space-y-4 overflow-y-auto rounded-t-2xl bg-surface p-4 sm:max-w-md sm:rounded-2xl"
       >
         <div className="flex gap-2">
           {(Object.keys(TX_TYPES) as TxType[]).map((t) => (
