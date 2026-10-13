@@ -47,6 +47,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        render_as_batch=True,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -69,7 +70,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=True,  # SQLite no puede ALTER de constraints: recrea la tabla
         )
 
         with context.begin_transaction():

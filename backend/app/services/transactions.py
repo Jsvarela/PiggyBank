@@ -10,9 +10,8 @@ from app.services.catalog import get_or_404
 from app.timeutil import today_bogota
 
 
-def save_transaction(
-    db: Session, data: TransactionIn, tx: Transaction | None = None
-) -> Transaction:
+def check_refs(db: Session, data) -> None:
+    """Cuentas y categoría existen y la categoría es del tipo del movimiento (o regla)."""
     get_or_404(db, Account, data.account_id)
     if data.to_account_id is not None:
         get_or_404(db, Account, data.to_account_id)
@@ -20,6 +19,12 @@ def save_transaction(
         category = get_or_404(db, Category, data.category_id)
         if category.kind.value != data.type.value:
             raise DomainError("La categoría no corresponde al tipo de movimiento")
+
+
+def save_transaction(
+    db: Session, data: TransactionIn, tx: Transaction | None = None
+) -> Transaction:
+    check_refs(db, data)
 
     values = data.model_dump(exclude={"id"})
     values["date"] = data.date or today_bogota()

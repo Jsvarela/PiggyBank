@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useApiMutation, useCategories } from '../api/hooks'
 import type { Category, CategoryBody } from '../api/types'
+import Ready from '../components/Ready'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Escribe un nombre'),
@@ -57,10 +58,16 @@ function CategoryForm({ category, onDone }: { category?: Category; onDone: () =>
 }
 
 export default function Categories() {
-  const { data: categories = [] } = useCategories()
+  const query = useCategories()
+  const categories = query.data ?? []
   const [editing, setEditing] = useState<Category | null | undefined>(undefined)
 
-  if (editing !== undefined) return <CategoryForm key={editing?.id ?? 'new'} category={editing ?? undefined} onDone={() => setEditing(undefined)} />
+  if (editing !== undefined)
+    return (
+      <Ready of={[query]}>
+        <CategoryForm key={editing?.id ?? 'new'} category={editing ?? undefined} onDone={() => setEditing(undefined)} />
+      </Ready>
+    )
   return (
     <div className="space-y-3">
       <button className="w-full rounded-lg bg-emerald-600 py-2 text-white" onClick={() => setEditing(null)}>

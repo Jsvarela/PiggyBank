@@ -6,8 +6,11 @@ import Layout from './components/Layout'
 import Accounts from './pages/Accounts'
 import Budgets from './pages/Budgets'
 import Categories from './pages/Categories'
+import Goals from './pages/Goals'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import More from './pages/More'
+import Recurring from './pages/Recurring'
 import Transactions from './pages/Transactions'
 
 const queryClient = new QueryClient({
@@ -24,6 +27,9 @@ function Gate() {
         <Route path="/" element={<Home />} />
         <Route path="/movimientos" element={<Transactions />} />
         <Route path="/presupuestos" element={<Budgets />} />
+        <Route path="/metas" element={<Goals />} />
+        <Route path="/mas" element={<More />} />
+        <Route path="/recurrentes" element={<Recurring />} />
         <Route path="/cuentas" element={<Accounts />} />
         <Route path="/categorias" element={<Categories />} />
       </Route>

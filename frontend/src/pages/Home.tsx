@@ -1,6 +1,7 @@
 import { useDashboard } from '../api/hooks'
 import BudgetAlerts from '../components/BudgetAlerts'
 import TransactionRow from '../components/TransactionRow'
+import UpcomingList from '../components/UpcomingList'
 import { formatCOP } from '../lib/money'
 
 export default function Home() {
@@ -39,6 +40,11 @@ export default function Home() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="rounded-xl bg-white p-4 shadow-sm">
+        <h2 className="mb-2 font-medium">Próximos pagos</h2>
+        <UpcomingList limit={5} />
       </section>
 
       <section className="rounded-xl bg-white p-4 shadow-sm">

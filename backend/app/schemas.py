@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
-from app.models import AccountType, CategoryKind, TxType
+from app.models import AccountType, CategoryKind, Frequency, TxType
 
 EMAIL = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
@@ -48,6 +48,17 @@ class CategoryOut(CategoryIn):
     id: int
 
 
+def check_coherence(m) -> None:
+    """Reglas de forma compartidas por movimientos y reglas recurrentes."""
+    if m.type == TxType.transfer:
+        if m.to_account_id is None or m.category_id is not None:
+            raise ValueError("Una transferencia necesita cuenta destino y no lleva categoría")
+        if m.to_account_id == m.account_id:
+            raise ValueError("La cuenta origen y destino deben ser distintas")
+    elif m.to_account_id is not None or m.category_id is None:
+        raise ValueError("Ingresos y gastos necesitan categoría y no llevan cuenta destino")
+
+
 class TransactionIn(BaseModel):
     id: str | None = Field(default=None, max_length=36)
     type: TxType
@@ -61,19 +72,15 @@ class TransactionIn(BaseModel):
 
     @model_validator(mode="after")
     def _coherence(self):
-        if self.type == TxType.transfer:
-            if self.to_account_id is None or self.category_id is not None:
-                raise ValueError("Una transferencia necesita cuenta destino y no lleva categoría")
-            if self.to_account_id == self.account_id:
-                raise ValueError("La cuenta origen y destino deben ser distintas")
-        elif self.to_account_id is not None or self.category_id is None:
-            raise ValueError("Ingresos y gastos necesitan categoría y no llevan cuenta destino")
+        check_coherence(self)
         return self
 
 
 class TransactionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
+    recurring_rule_id: int | None = None
+    goal_id: int | None = None
     type: TxType
     amount: int
     date: dt.date
@@ -87,6 +94,65 @@ class TransactionOut(BaseModel):
 class TransactionPage(BaseModel):
     items: list[TransactionOut]
     total: int
+
+
+class RecurringIn(BaseModel):
+    type: TxType
+    amount: StrictInt = Field(gt=0)
+    account_id: int
+    to_account_id: int | None = None
+    category_id: int | None = None
+    description: str | None = Field(default=None, max_length=255)
+    frequency: Frequency
+    start_date: dt.date
+    end_date: dt.date | None = None
+    active: bool = True
+
+    @model_validator(mode="after")
+    def _coherence(self):
+        check_coherence(self)
+        if self.end_date is not None and self.end_date < self.start_date:
+            raise ValueError("La fecha final no puede ser anterior a la inicial")
+        return self
+
+
+class RecurringOut(RecurringIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    next_run_date: dt.date
+
+
+class UpcomingPayment(BaseModel):
+    rule_id: int
+    date: dt.date
+    type: TxType
+    amount: int
+    description: str | None
+    account_id: int
+    to_account_id: int | None
+    category_id: int | None
+
+
+class GoalIn(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    target_amount: StrictInt = Field(gt=0)
+    deadline: dt.date | None = None
+    account_id: int | None = None
+
+
+class GoalOut(GoalIn):
+    id: int
+    saved: int
+    remaining: int
+    percent: int
+    reached: bool
+    monthly_suggested: int | None  # None = sin fecha límite
+
+
+class ContributionIn(BaseModel):
+    amount: StrictInt = Field(gt=0)
+    from_account_id: int
+    date: dt.date | None = None
 
 
 MONTH = r"^\d{4}-(0[1-9]|1[0-2])$"

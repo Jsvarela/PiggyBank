@@ -5,9 +5,12 @@ import type {
   BudgetStatus,
   Category,
   Dashboard,
+  Goal,
   MonthlyReport,
+  RecurringRule,
   Transaction,
   TransactionFilters,
+  UpcomingPayment,
   User,
 } from './types'
 
@@ -27,7 +30,7 @@ export function useTransactions(f: TransactionFilters) {
   })
 }
 
-/** Cualquier cambio invalida todo: son pocos datos y así los saldos nunca quedan viejos. */
+/** Cualquier cambio invalida todo: son pocos datos y asÃ­ los saldos nunca quedan viejos. */
 export function useApiMutation<B = void>(method: string, path: (body: B) => string) {
   const qc = useQueryClient()
   return useMutation({
@@ -40,3 +43,8 @@ export const useBudgetStatus = (month?: string) =>
   useQuery({ queryKey: ['budget-status', month], queryFn: () => api<BudgetStatus[]>(`/budgets/status${month ? `?month=${month}` : ''}`) })
 export const useMonthlyReport = (month: string) =>
   useQuery({ queryKey: ['monthly-report', month], queryFn: () => api<MonthlyReport>(`/reports/monthly?month=${month}`) })
+
+export const useRecurring = () => useQuery({ queryKey: ['recurring'], queryFn: () => api<RecurringRule[]>('/recurring') })
+export const useUpcoming = (days = 30) =>
+  useQuery({ queryKey: ['upcoming', days], queryFn: () => api<UpcomingPayment[]>(`/recurring/upcoming?days=${days}`) })
+export const useGoals = () => useQuery({ queryKey: ['goals'], queryFn: () => api<Goal[]>('/savings-goals') })

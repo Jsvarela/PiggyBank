@@ -12,6 +12,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     String,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -44,6 +45,14 @@ class TxType(str, enum.Enum):
     income = "income"
     expense = "expense"
     transfer = "transfer"
+
+
+class Frequency(str, enum.Enum):
+    daily = "daily"
+    weekly = "weekly"
+    biweekly = "biweekly"  # cada 14 días
+    monthly = "monthly"
+    yearly = "yearly"
 
 
 class User(Base):
@@ -106,9 +115,51 @@ class Budget(Base):
     alert_threshold: Mapped[int] = mapped_column(default=80)
 
 
+class RecurringRule(Base):
+    """Plantilla de movimiento que se repite. Las fechas se calculan desde `start_date`."""
+
+    __tablename__ = "recurring_rules"
+    __table_args__ = (
+        CheckConstraint("amount > 0", name="amount_positive"),
+        CheckConstraint(
+            "(type = 'transfer' AND to_account_id IS NOT NULL AND category_id IS NULL"
+            " AND to_account_id != account_id)"
+            " OR (type != 'transfer' AND to_account_id IS NULL AND category_id IS NOT NULL)",
+            name="type_coherence",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    type: Mapped[TxType] = mapped_column(_enum(TxType))
+    amount: Mapped[int] = mapped_column(BigInteger)
+    account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"))
+    to_account_id: Mapped[int | None] = mapped_column(ForeignKey("accounts.id"))
+    category_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"))
+    description: Mapped[str | None] = mapped_column(String(255))
+    frequency: Mapped[Frequency] = mapped_column(_enum(Frequency))
+    start_date: Mapped[date] = mapped_column(Date)
+    end_date: Mapped[date | None] = mapped_column(Date)
+    next_run_date: Mapped[date] = mapped_column(Date)
+    active: Mapped[bool] = mapped_column(default=True)
+
+
+class SavingsGoal(Base):
+    __tablename__ = "savings_goals"
+    __table_args__ = (CheckConstraint("target_amount > 0", name="target_positive"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    target_amount: Mapped[int] = mapped_column(BigInteger)
+    deadline: Mapped[date | None] = mapped_column(Date)
+    account_id: Mapped[int | None] = mapped_column(ForeignKey("accounts.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = (
+        # una regla no puede generar dos movimientos el mismo día (idempotencia a nivel de BD)
+        UniqueConstraint("recurring_rule_id", "date", name="uq_tx_rule_date"),
         CheckConstraint("amount > 0", name="amount_positive"),
         CheckConstraint(
             "(type = 'transfer' AND to_account_id IS NOT NULL AND category_id IS NULL"
@@ -131,4 +182,6 @@ class Transaction(Base):
     category_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"))
     description: Mapped[str | None] = mapped_column(String(255))
     tags: Mapped[list[str]] = mapped_column(JSON, default=list)
+    recurring_rule_id: Mapped[int | None] = mapped_column(ForeignKey("recurring_rules.id"))
+    goal_id: Mapped[int | None] = mapped_column(ForeignKey("savings_goals.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

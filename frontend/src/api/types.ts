@@ -5,7 +5,7 @@ export const ACCOUNT_TYPES: Record<AccountType, string> = {
   cash: 'Efectivo',
   bank: 'Banco',
   digital_wallet: 'Billetera digital',
-  credit_card: 'Tarjeta de crédito',
+  credit_card: 'Tarjeta de crÃ©dito',
   savings: 'Ahorros',
 }
 
@@ -53,6 +53,8 @@ export interface TransactionBody {
 export interface Transaction extends TransactionBody {
   id: string
   tags: string[]
+  recurring_rule_id?: number | null
+  goal_id?: number | null
 }
 
 export interface Dashboard {
@@ -103,4 +105,56 @@ export interface MonthlyReport {
   previous_income: number
   previous_expense: number
   categories: { category_id: number; name: string; amount: number; previous: number; diff: number }[]
+}
+
+export type Frequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly'
+export const FREQUENCIES: Record<Frequency, string> = {
+  daily: 'Diaria',
+  weekly: 'Semanal',
+  biweekly: 'Cada 14 días',
+  monthly: 'Mensual',
+  yearly: 'Anual',
+}
+
+export interface RecurringBody {
+  type: TxType
+  amount: number
+  account_id: number
+  to_account_id: number | null
+  category_id: number | null
+  description: string | null
+  frequency: Frequency
+  start_date: string
+  end_date: string | null
+  active: boolean
+}
+export interface RecurringRule extends RecurringBody {
+  id: number
+  next_run_date: string
+}
+
+export interface UpcomingPayment {
+  rule_id: number
+  date: string
+  type: TxType
+  amount: number
+  description: string | null
+  account_id: number
+  to_account_id: number | null
+  category_id: number | null
+}
+
+export interface GoalBody {
+  name: string
+  target_amount: number
+  deadline: string | null
+  account_id: number | null
+}
+export interface Goal extends GoalBody {
+  id: number
+  saved: number
+  remaining: number
+  percent: number
+  reached: boolean
+  monthly_suggested: number | null
 }

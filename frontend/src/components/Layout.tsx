@@ -1,23 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Transaction } from '../api/types'
 import { useQueryClient } from '@tanstack/react-query'
+import { useAccounts, useCategories } from '../api/hooks'
 import { EditorContext } from './editor'
+import Ready from './Ready'
 import QuickAdd from './QuickAdd'
 
 const links = [
   ['/', 'Inicio'],
   ['/movimientos', 'Movimientos'],
   ['/presupuestos', 'Presupuestos'],
-  ['/cuentas', 'Cuentas'],
-  ['/categorias', 'Categorías'],
+  ['/metas', 'Metas'],
+  ['/mas', 'Más'],
 ] as const
 
 export default function Layout() {
   // undefined = cerrado, null = nuevo movimiento, Transaction = editar
   const [editing, setEditing] = useState<Transaction | null | undefined>(undefined)
   const qc = useQueryClient()
+  const accounts = useAccounts()
+  const categories = useCategories()
+
+  // al abrir la app: crea los movimientos recurrentes que ya tocaban (es idempotente)
+  useEffect(() => {
+    api<{ created: number }>('/sync', { method: 'POST' })
+      .then((r) => {
+        if (r.created > 0) qc.invalidateQueries()
+      })
+      .catch(() => {})
+  }, [qc])
 
   return (
     <EditorContext.Provider value={(tx) => setEditing(tx ?? null)}>
@@ -58,7 +71,11 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        {editing !== undefined && <QuickAdd tx={editing ?? undefined} onClose={() => setEditing(undefined)} />}
+        {editing !== undefined && (
+          <Ready of={[accounts, categories]}>
+            <QuickAdd tx={editing ?? undefined} onClose={() => setEditing(undefined)} />
+          </Ready>
+        )}
       </div>
     </EditorContext.Provider>
   )
