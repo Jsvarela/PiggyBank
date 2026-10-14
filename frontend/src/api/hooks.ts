@@ -18,7 +18,9 @@ import type {
 export const useMe = () =>
   useQuery({
     queryKey: ['me'],
-    retry: false,
+    // un 401 es definitivo; cualquier otro fallo (servidor dormido, sin red) se reintenta ~25 s mientras despierta
+    retry: (n, e) => !(e instanceof ApiError && e.status === 401) && n < 6,
+    retryDelay: 4000,
     queryFn: async () => {
       try {
         const user = await api<User>('/auth/me')

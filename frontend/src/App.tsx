@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { ApiError } from './api/client'
 import { useConfig, useMe } from './api/hooks'
@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import Loading from './components/Loading'
 import { initAnalytics, trackPage } from './lib/analytics'
+import { authView } from './lib/authView'
 import { hadSession } from './lib/localCache'
 import Account from './pages/Account'
 import Accounts from './pages/Accounts'
@@ -38,17 +39,26 @@ function Analytics() {
   return null
 }
 
+/** El servidor gratuito se duerme y tarda hasta ~1 minuto en despertar: se avisa en vez de dejar la pantalla muda. */
+function Waking() {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 4000)
+    return () => clearTimeout(t)
+  }, [])
+  return (
+    <div className="space-y-2 p-4">
+      <Loading />
+      {slow && <p className="text-sm text-slate-500">El servidor estaba dormido y está despertando. Puede tardar hasta 1 minuto.</p>}
+    </div>
+  )
+}
+
 function Gate() {
   const { data: user, isLoading, error } = useMe()
-  if (isLoading)
-    return (
-      <div className="p-4">
-        <Loading />
-      </div>
-    )
-  // sin internet (no es un 401) y ya había sesión: se abre la app en vez de pedir login
-  const offline = !user && error !== null && !(error instanceof ApiError) && hadSession()
-  if (!user && !offline) return <Login />
+  const view = authView({ user, isLoading, error, hadSession: hadSession() })
+  if (view === 'loading') return <Waking />
+  if (view === 'login') return <Login />
   return (
     <Routes>
       <Route element={<Layout />}>
