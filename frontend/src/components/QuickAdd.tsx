@@ -7,7 +7,7 @@ import { api } from '../api/client'
 import { useAccounts, useApiMutation, useCategories } from '../api/hooks'
 import { TX_TYPES, type Transaction, type TransactionBody, type TxType } from '../api/types'
 import { todayBogota } from '../lib/dates'
-import { MAX_MONEY, MONEY_TOO_BIG, formatCOP } from '../lib/money'
+import { MAX_MONEY, MONEY_TOO_BIG, QUICK_AMOUNTS, addToAmount, formatCOP } from '../lib/money'
 import { createTransaction } from '../lib/offlineQueue'
 
 const LAST_ACCOUNT = 'lastAccountId'
@@ -153,6 +153,24 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
             <p className="text-sm text-red-600">{errors.amount.message}</p>
           ) : (
             Number.isFinite(amount) && amount > 0 && <p className="text-sm text-slate-600">{formatCOP(amount)}</p> // 45000 -> $ 45.000
+          )}
+          {/* suma rápida: con unos toques se arma el monto (10.000 + 20.000 + 5.000…) sin teclear */}
+          <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="Sumar al monto">
+            {QUICK_AMOUNTS.map((inc) => (
+              <button
+                type="button"
+                key={inc}
+                className="min-h-11 rounded-xl border border-slate-300 bg-surface py-2 text-sm font-medium"
+                onClick={() => setValue('amount', addToAmount(amount, inc), { shouldValidate: formState.isSubmitted })}
+              >
+                +{formatCOP(inc).replace('$ ', '')}
+              </button>
+            ))}
+          </div>
+          {Number.isFinite(amount) && amount > 0 && (
+            <button type="button" className="mt-1 text-sm text-slate-600 underline" onClick={() => setValue('amount', undefined as unknown as number)}>
+              Borrar monto
+            </button>
           )}
         </div>
 
