@@ -35,8 +35,12 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def _driver(cls, v: str) -> str:
-        # algunos hostings entregan "postgres://", que SQLAlchemy ya no acepta
-        return v.replace("postgres://", "postgresql://", 1) if v.startswith("postgres://") else v
+        # "postgres://" ya no lo acepta SQLAlchemy, y "postgresql+psycopg://" pide un driver (psycopg 3)
+        # que no usamos: ambos se llevan a "postgresql://", que usa psycopg2 (el instalado).
+        for prefix in ("postgres://", "postgresql+psycopg://"):
+            if v.startswith(prefix):
+                return "postgresql://" + v[len(prefix) :]
+        return v
 
     @model_validator(mode="after")
     def _prod_secret(self):

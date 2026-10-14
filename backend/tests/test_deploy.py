@@ -55,6 +55,15 @@ def test_enlaces_de_correo_usan_la_url_de_render_y_se_puede_sobrescribir(monkeyp
     assert Settings(_env_file=None, app_url="https://mi-dominio.co").app_url == "https://mi-dominio.co"
 
 
-def test_url_postgres_de_render_se_normaliza():
-    s = Settings(_env_file=None, database_url="postgres://u:p@host/db")
-    assert s.database_url == "postgresql://u:p@host/db"
+@pytest.mark.parametrize(
+    "entrada",
+    [
+        "postgres://u:p@host/db",  # estilo antiguo (Heroku/Render)
+        "postgresql://u:p@host/db",  # ya correcta: no se toca
+        "postgresql+psycopg://u:p@host/db?sslmode=require",  # pide psycopg 3, que no está instalado
+    ],
+)
+def test_url_postgres_se_normaliza_al_driver_instalado(entrada):
+    s = Settings(_env_file=None, database_url=entrada)
+    assert s.database_url.startswith("postgresql://u:p@host/db")
+    assert "+psycopg" not in s.database_url
