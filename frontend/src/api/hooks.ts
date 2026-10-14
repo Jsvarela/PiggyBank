@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { setSession, readCache, writeCache } from '../lib/localCache'
+import { readCache, sessionUserId, setSession, writeCache } from '../lib/localCache'
 import { ApiError, api } from './client'
 import type {
   Account,
@@ -7,6 +7,7 @@ import type {
   Category,
   Dashboard,
   Goal,
+  Invite,
   MonthlyReport,
   RecurringRule,
   Transaction,
@@ -24,7 +25,7 @@ export const useMe = () =>
     queryFn: async () => {
       try {
         const user = await api<User>('/auth/me')
-        setSession(true)
+        setSession(true, user.id)
         return user
       } catch (e) {
         if (e instanceof ApiError && e.status === 401) setSession(false)
@@ -32,6 +33,9 @@ export const useMe = () =>
       }
     },
   })
+
+/** Quién soy: del servidor, o (sin internet) de la última sesión. Lo pendiente sin conexión se guarda a mi nombre. */
+export const useUserId = () => useMe().data?.id ?? sessionUserId()
 
 /** Lista con copia local: sin red se usa la última conocida (y se sigue pidiendo al servidor). */
 const useCachedList = <T>(key: string, path: string) =>
@@ -81,6 +85,8 @@ export const useGoals = () => useQuery({ queryKey: ['goals'], queryFn: () => api
 export const useConfig = () =>
   useQuery({
     queryKey: ['config'],
-    queryFn: () => api<{ email_enabled: boolean; analytics_url: string | null }>('/config'),
+    queryFn: () => api<{ email_enabled: boolean; analytics_url: string | null; registration: 'first' | 'invite' }>('/config'),
     staleTime: Infinity,
   })
+
+export const useInvites = () => useQuery({ queryKey: ['invites'], queryFn: () => api<Invite[]>('/auth/invites') })

@@ -19,6 +19,15 @@ export interface User {
   id: number
   email: string
   email_verified: boolean
+  is_admin: boolean
+}
+
+export interface Invite {
+  id: number
+  created_at: string
+  expires_at: string
+  status: 'pendiente' | 'usada' | 'vencida'
+  used_by_email: string | null
 }
 
 export interface AccountBody {

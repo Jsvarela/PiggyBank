@@ -13,10 +13,12 @@ from sqlalchemy import (
     Index,
     String,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
+from app.tenancy import Owned
 
 
 def _now() -> datetime:
@@ -65,9 +67,24 @@ class User(Base):
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # sube cada vez que se debe invalidar toda sesión abierta (ver security.py)
     token_version: Mapped[int] = mapped_column(default=0, server_default="0")
+    is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())  # puede invitar gente
 
 
-class Account(Base):
+class Invite(Base):
+    """Invitación de un solo uso para crear una cuenta. El código se muestra una vez; aquí solo su hash."""
+
+    __tablename__ = "invites"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    used_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+
+
+class Account(Owned, Base):
     __tablename__ = "accounts"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -81,7 +98,7 @@ class Account(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
-class Category(Base):
+class Category(Owned, Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -93,7 +110,7 @@ class Category(Base):
     archived: Mapped[bool] = mapped_column(default=False)
 
 
-class Budget(Base):
+class Budget(Owned, Base):
     """Límite mensual de gasto por categoría.
 
     `is_default` = se repite cada mes; una fila con `month` ("YYYY-MM") reemplaza al default
@@ -118,7 +135,7 @@ class Budget(Base):
     alert_threshold: Mapped[int] = mapped_column(default=80)
 
 
-class RecurringRule(Base):
+class RecurringRule(Owned, Base):
     """Plantilla de movimiento que se repite. Las fechas se calculan desde `start_date`."""
 
     __tablename__ = "recurring_rules"
@@ -146,7 +163,7 @@ class RecurringRule(Base):
     active: Mapped[bool] = mapped_column(default=True)
 
 
-class SavingsGoal(Base):
+class SavingsGoal(Owned, Base):
     __tablename__ = "savings_goals"
     __table_args__ = (CheckConstraint("target_amount > 0", name="target_positive"),)
 
@@ -158,7 +175,7 @@ class SavingsGoal(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
-class Transaction(Base):
+class Transaction(Owned, Base):
     __tablename__ = "transactions"
     __table_args__ = (
         # una regla no puede generar dos movimientos el mismo día (idempotencia a nivel de BD)

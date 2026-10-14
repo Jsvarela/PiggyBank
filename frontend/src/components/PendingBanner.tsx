@@ -1,10 +1,10 @@
-import { useAccounts } from '../api/hooks'
+import { useAccounts, useUserId } from '../api/hooks'
 import { discard, usePending } from '../lib/offlineQueue'
 import { formatCOP } from '../lib/money'
 
 /** Movimientos registrados sin conexión que todavía no llegaron al servidor. */
 export default function PendingBanner() {
-  const pending = usePending()
+  const pending = usePending(useUserId())
   const accounts = useAccounts().data ?? []
   if (pending.length === 0) return null
   const waiting = pending.filter((p) => !p.error).length

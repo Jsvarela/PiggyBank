@@ -12,8 +12,6 @@ import random
 import sys
 from datetime import timedelta
 
-from sqlalchemy import delete
-
 from app.db import Base, SessionLocal, engine
 from app.models import (
     Account,
@@ -30,7 +28,6 @@ from app.models import (
 )
 from app.security import hash_password
 from app.seed import seed_categories
-from app.services.backup import wipe_data
 from app.timeutil import today_bogota
 
 EMAIL, PASSWORD = "worst@localhost.test", "worst-case-local-123"
@@ -164,12 +161,13 @@ BUILDERS = {"worst": build_worst, "empty": lambda db: None, "one": build_one, "h
 
 
 def main(state: str) -> None:
-    Base.metadata.create_all(engine)  # base desechable de desarrollo: sin Alembic
+    Base.metadata.drop_all(engine)  # base desechable de desarrollo: se recrea de cero, sin Alembic
+    Base.metadata.create_all(engine)
     with SessionLocal() as db:
-        wipe_data(db)
-        db.execute(delete(User))
-        db.add(User(email=EMAIL, password_hash=hash_password(PASSWORD)))
+        user = User(email=EMAIL, password_hash=hash_password(PASSWORD), is_admin=True)
+        db.add(user)
         db.commit()
+        db.info["user_id"] = user.id  # todo lo que sigue es de este usuario
         seed_categories(db)
         BUILDERS[state](db)
         db.commit()

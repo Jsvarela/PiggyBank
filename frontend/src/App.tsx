@@ -11,6 +11,7 @@ import { authView } from './lib/authView'
 import { hadSession } from './lib/localCache'
 import Account from './pages/Account'
 import Accounts from './pages/Accounts'
+import Invite from './pages/Invite'
 import Budgets from './pages/Budgets'
 import Categories from './pages/Categories'
 import ForgotPassword from './pages/ForgotPassword'
@@ -72,6 +73,7 @@ function Gate() {
         <Route path="/cuentas" element={<Accounts />} />
         <Route path="/categorias" element={<Categories />} />
         <Route path="/cuenta" element={<Account />} />
+        <Route path="/invitar" element={<Invite />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

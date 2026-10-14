@@ -16,10 +16,29 @@ class Credentials(BaseModel):
     password: str = Field(min_length=8, max_length=128)
 
 
+class RegisterIn(Credentials):
+    invite_code: str | None = Field(default=None, max_length=100)  # no hace falta para el primer usuario
+
+
 class UserOut(BaseModel):
     id: int
     email: str
     email_verified: bool = False
+    is_admin: bool = False
+
+
+class InviteCreated(BaseModel):
+    id: int
+    code: str  # solo se muestra al crearla
+    expires_at: dt.datetime
+
+
+class InviteOut(BaseModel):
+    id: int
+    created_at: dt.datetime
+    expires_at: dt.datetime
+    status: Literal["pendiente", "usada", "vencida"]
+    used_by_email: str | None = None
 
 
 class AccountIn(BaseModel):

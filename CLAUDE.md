@@ -1,6 +1,6 @@
 # Finanzas personales (PWA + FastAPI)
 
-App de uso personal, un solo usuario, COP. Plan completo: `prompt-app-gastos-claude-code.md`.
+App de finanzas personales, COP, para familia y amigos (~10 personas, cada una con sus datos, por invitación). Plan completo: `prompt-app-gastos-claude-code.md`.
 
 ## Reglas no negociables
 1. Dinero: nunca `float`. Enteros COP (BigInteger), sin decimales. Formato `$ 1.234.567`.
@@ -10,6 +10,7 @@ App de uso personal, un solo usuario, COP. Plan completo: `prompt-app-gastos-cla
 5. Seguridad: argon2, JWT en cookie httpOnly/Secure/SameSite, rate limit en login, CORS restringido, secretos en `.env`.
 6. Lógica de negocio en `backend/app/services/`, separada de las rutas. Tests ANTES de implementar.
 7. Interfaz en español.
+8. Todo dato tiene dueño (`user_id`). El filtro es automático en `app/tenancy.py` y falla cerrado (sin usuario en la sesión lanza `TenantError`). No escribas `.where(user_id=…)` a mano ni uses subconsultas/alias sobre tablas con dueño. Registro solo por invitación (el primer usuario es admin).
 
 ## Comandos
 - Backend (desde `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run uvicorn app.main:app --reload`

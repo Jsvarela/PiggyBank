@@ -22,15 +22,25 @@ export function writeCache(key: string, value: unknown) {
 
 export const hadSession = () => {
   try {
-    return localStorage.getItem(SESSION) === '1'
+    return localStorage.getItem(SESSION) !== null
   } catch {
     return false
   }
 }
 
-export function setSession(active: boolean) {
+/** Quién tenía la sesión la última vez (sirve sin internet, cuando aún no se puede preguntar al servidor). */
+export function sessionUserId(): number | null {
   try {
-    if (active) localStorage.setItem(SESSION, '1')
+    const n = Number(localStorage.getItem(SESSION))
+    return Number.isInteger(n) && n > 0 ? n : null
+  } catch {
+    return null
+  }
+}
+
+export function setSession(active: boolean, userId?: number) {
+  try {
+    if (active) localStorage.setItem(SESSION, String(userId ?? sessionUserId() ?? 1))
     else {
       localStorage.removeItem(SESSION)
       Object.keys(localStorage).filter((k) => k.startsWith(PREFIX)).forEach((k) => localStorage.removeItem(k))

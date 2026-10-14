@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { api } from '../api/client'
-import { useAccounts, useApiMutation, useCategories } from '../api/hooks'
+import { useAccounts, useApiMutation, useCategories, useUserId } from '../api/hooks'
 import { TX_TYPES, type Transaction, type TransactionBody, type TxType } from '../api/types'
 import { todayBogota } from '../lib/dates'
 import { MAX_MONEY, MONEY_TOO_BIG, QUICK_AMOUNTS, addToAmount, formatCOP } from '../lib/money'
@@ -49,9 +49,10 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
   const accounts = (useAccounts().data ?? []).filter((a) => !a.archived)
   const categories = useCategories().data ?? []
   const qc = useQueryClient()
+  const userId = useUserId()
   // crear puede quedar en cola si no hay conexión; editar y borrar siempre necesitan red
   const save = useMutation({
-    mutationFn: (body: TransactionBody) => (tx ? api(`/transactions/${tx.id}`, { method: 'PUT', body }) : createTransaction(body)),
+    mutationFn: (body: TransactionBody) => (tx ? api(`/transactions/${tx.id}`, { method: 'PUT', body }) : createTransaction(body, userId)),
     // sin `return`: no esperar el refresco, que sin conexión tarda en fallar y retrasaría cerrar la hoja
     onSuccess: () => {
       qc.invalidateQueries()

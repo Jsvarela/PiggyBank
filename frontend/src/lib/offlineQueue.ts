@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import { useSyncExternalStore } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { ApiError, api } from '../api/client'
 import type { TransactionBody } from '../api/types'
 
@@ -8,6 +8,7 @@ export interface Pending {
   id: string
   body: TransactionBody
   createdAt: number
+  userId: number // de quién es: en un celular compartido, lo de una persona jamás se envía a la cuenta de otra
   error?: string // el servidor lo rechazó: no se reintenta solo
 }
 
@@ -32,17 +33,20 @@ async function refresh() {
 }
 refresh().catch(() => {}) // IndexedDB no disponible (modo privado): la app sigue sin cola
 
-export const usePending = () =>
-  useSyncExternalStore(
+/** Solo lo pendiente de la persona indicada (los pendientes viejos sin dueño conocido no se muestran ni se envían). */
+export function usePending(userId: number | null) {
+  const all = useSyncExternalStore(
     (l) => {
       listeners.add(l)
       return () => listeners.delete(l)
     },
     () => snapshot,
   )
+  return useMemo(() => all.filter((p) => p.userId === userId), [all, userId])
+}
 
-export async function enqueue(body: TransactionBody, id: string) {
-  await queueDb.pending.put({ id, body, createdAt: Date.now() })
+export async function enqueue(body: TransactionBody, id: string, userId: number) {
+  await queueDb.pending.put({ id, body, createdAt: Date.now(), userId })
   await refresh()
 }
 
@@ -56,14 +60,14 @@ export async function discard(id: string) {
  * del intento: si el servidor sí lo recibió y solo se perdió la respuesta, el reintento no duplica.
  * Los errores del servidor (4xx/5xx) no se encolan: el usuario debe verlos.
  */
-export async function createTransaction(body: TransactionBody): Promise<'sent' | 'queued'> {
+export async function createTransaction(body: TransactionBody, userId: number | null): Promise<'sent' | 'queued'> {
   const id = crypto.randomUUID()
   try {
     await api('/transactions', { method: 'POST', body: { ...body, id } })
     return 'sent'
   } catch (e) {
-    if (!(e instanceof TypeError)) throw e
-    await enqueue(body, id)
+    if (!(e instanceof TypeError) || userId === null) throw e // sin saber de quién es, no se puede guardar para después
+    await enqueue(body, id, userId)
     return 'queued'
   }
 }
@@ -71,14 +75,14 @@ export async function createTransaction(body: TransactionBody): Promise<'sent' |
 let inflight: Promise<number> | null = null
 
 /** Envía lo pendiente en orden. Devuelve cuántos se enviaron. Seguro de llamar varias veces. */
-export function flushQueue(): Promise<number> {
-  inflight ??= run().finally(() => (inflight = null))
+export function flushQueue(userId: number): Promise<number> {
+  inflight ??= run(userId).finally(() => (inflight = null))
   return inflight
 }
 
-async function run(): Promise<number> {
+async function run(userId: number): Promise<number> {
   let sent = 0
-  for (const p of (await getPending()).filter((p) => !p.error)) {
+  for (const p of (await getPending()).filter((p) => p.userId === userId && !p.error)) {
     try {
       await api('/transactions', { method: 'POST', body: { ...p.body, id: p.id } })
       await queueDb.pending.delete(p.id)

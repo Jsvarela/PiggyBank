@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { ApiError } from '../api/client'
 import { authView } from './authView'
 
-const user = { id: 1, email: 'a@b.co', email_verified: true }
+const user = { id: 1, email: 'a@b.co', email_verified: true, is_admin: false }
 const base = { user: undefined, isLoading: false, error: null, hadSession: true }
 
 test('con sesión válida entra a la app', () => {

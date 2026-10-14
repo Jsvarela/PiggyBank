@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from app import mailer
 from app.config import settings
 from app.db import get_db
-from app.deps import COOKIE, get_current_user
-from app.models import User
+from app.deps import COOKIE, get_admin, get_current_user
+from app.models import Invite, User
 from app.ratelimit import limiter
-from app.schemas import Credentials, UserOut
+from app.schemas import Credentials, InviteCreated, InviteOut, RegisterIn, UserOut
 from app.security import SESSION_DAYS, create_token, verify_password
 from app.services import auth as auth_service
 
@@ -51,7 +51,7 @@ def _set_cookie(response: Response, user: User) -> None:
 
 
 def _out(user: User) -> UserOut:
-    return UserOut(id=user.id, email=user.email, email_verified=user.email_verified_at is not None)
+    return UserOut(id=user.id, email=user.email, email_verified=user.email_verified_at is not None, is_admin=user.is_admin)
 
 
 def _require_password(user: User, password: str) -> None:
@@ -61,11 +61,34 @@ def _require_password(user: User, password: str) -> None:
 
 @router.post("/register", status_code=201, response_model=UserOut)
 @limiter.limit("10/hour")
-def register(request: Request, body: Credentials, background: BackgroundTasks, db: Session = Depends(get_db)):
-    user = auth_service.register(db, body.email, body.password)
+def register(request: Request, body: RegisterIn, background: BackgroundTasks, db: Session = Depends(get_db)):
+    user = auth_service.register(db, body.email, body.password, body.invite_code)
     if settings.email_enabled:
         background.add_task(mailer.send_email, *auth_service.verification_message(user))
     return _out(user)
+
+
+@router.post("/invites", status_code=201, response_model=InviteCreated)
+def create_invite(admin: User = Depends(get_admin), db: Session = Depends(get_db)):
+    """Crea una invitación de un solo uso (vale 7 días). El código solo se muestra aquí."""
+    invite, code = auth_service.create_invite(db, admin)
+    return InviteCreated(id=invite.id, code=code, expires_at=invite.expires_at)
+
+
+@router.get("/invites", response_model=list[InviteOut])
+def list_invites(_: User = Depends(get_admin), db: Session = Depends(get_db)):
+    emails = {u.id: u.email for u in db.scalars(select(User))}
+    rows = db.scalars(select(Invite).order_by(Invite.id.desc())).all()
+    return [
+        InviteOut(id=i.id, created_at=i.created_at, expires_at=i.expires_at, status=auth_service.invite_status(i),
+                  used_by_email=emails.get(i.used_by))
+        for i in rows
+    ]
+
+
+@router.delete("/invites/{invite_id}", status_code=204)
+def revoke_invite(invite_id: int, _: User = Depends(get_admin), db: Session = Depends(get_db)):
+    auth_service.revoke_invite(db, invite_id)
 
 
 @router.post("/login", response_model=UserOut)

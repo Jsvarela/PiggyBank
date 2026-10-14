@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Transaction } from '../api/types'
 import { useQueryClient } from '@tanstack/react-query'
-import { useAccounts, useCategories } from '../api/hooks'
+import { useAccounts, useCategories, useUserId } from '../api/hooks'
 import { flushQueue } from '../lib/offlineQueue'
 import { setSession } from '../lib/localCache'
 import { EditorContext } from './editor'
@@ -31,8 +31,9 @@ const TITLES: Record<string, string> = {
   '/categorias': 'Categorías',
   '/importar': 'Importar extracto',
   '/cuenta': 'Cuenta',
+  '/invitar': 'Invitar',
 }
-const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar', '/cuenta'])
+const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar', '/cuenta', '/invitar'])
 
 export default function Layout() {
   const { pathname } = useLocation()
@@ -54,9 +55,12 @@ export default function Layout() {
 
   // movimientos guardados sin conexión: se envían al abrir, al volver la red y cada minuto
   // (el minuto cubre el caso de un servidor gratuito que aún está despertando)
+  // Solo se envía lo de ESTA persona: en un celular compartido, lo de otra jamás va a mi cuenta.
+  const userId = useUserId()
   useEffect(() => {
+    if (userId === null) return
     const flush = () =>
-      flushQueue()
+      flushQueue(userId)
         .then((sent) => {
           if (sent > 0) qc.invalidateQueries()
         })
@@ -68,7 +72,7 @@ export default function Layout() {
       clearInterval(timer)
       window.removeEventListener('online', flush)
     }
-  }, [qc])
+  }, [qc, userId])
 
   return (
     <EditorContext.Provider value={(tx) => setEditing(tx ?? null)}>

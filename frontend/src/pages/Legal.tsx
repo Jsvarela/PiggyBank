@@ -1,15 +1,22 @@
 import PublicPage from '../components/PublicPage'
 
 const note =
-  'Este texto describe cómo funciona esta app; es una plantilla informativa, no asesoría legal. Si vas a abrirla a otras personas, haz que un abogado la revise (en Colombia aplica la Ley 1581 de 2012 de protección de datos personales).'
+  'Este texto describe cómo funciona esta app; es una plantilla informativa, no asesoría legal. Como la usan varias personas, conviene que un abogado la revise (en Colombia aplica la Ley 1581 de 2012 de protección de datos personales).'
 
 export function Privacy() {
   return (
     <PublicPage title="Política de privacidad">
       <div className="space-y-4 text-sm leading-relaxed">
         <p>
-          <b>Finanzas</b> es una app de finanzas personales. Quien la despliega y administra es la persona responsable de los datos que se guardan en esa instalación.
+          <b>Finanzas</b> es una app de finanzas personales. Quien la despliega y administra es la persona responsable de los datos que se guardan en esa instalación. Solo se entra por invitación de quien administra.
         </p>
+        <section>
+          <h2 className="font-semibold">Qué ven las demás personas</h2>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Cada cuenta tiene sus datos separados: nadie más en la app puede ver tus movimientos, saldos ni metas.</li>
+            <li>Quien administra solo ve en la app a quién invitó y con qué correo se registró. Aun así, por ser quien mantiene la base de datos, técnicamente podría acceder a ella; se compromete a no hacerlo salvo para dar soporte que tú pidas.</li>
+          </ul>
+        </section>
         <section>
           <h2 className="font-semibold">Qué datos guarda</h2>
           <ul className="list-disc space-y-1 pl-5">
@@ -61,7 +68,7 @@ export function Terms() {
         <section>
           <h2 className="font-semibold">Uso</h2>
           <ul className="list-disc space-y-1 pl-5">
-            <li>Es una app de uso personal. Eres responsable de la veracidad de lo que registras y de cuidar tu contraseña.</li>
+            <li>Es una app de uso personal por invitación: cada persona usa solo su propia cuenta y no la comparte. Eres responsable de la veracidad de lo que registras y de cuidar tu contraseña.</li>
             <li>No la uses para actividades ilegales ni para intentar acceder a datos de otras personas.</li>
           </ul>
         </section>
@@ -74,7 +81,7 @@ export function Terms() {
         </section>
         <section>
           <h2 className="font-semibold">Tu cuenta</h2>
-          <p>Puedes eliminarla cuando quieras desde Más → Cuenta. Al hacerlo se borran todos tus datos y no se pueden recuperar.</p>
+          <p>Puedes eliminarla cuando quieras desde Más → Cuenta. Al hacerlo se borran todos tus datos (y solo los tuyos) y no se pueden recuperar.</p>
         </section>
         <section>
           <h2 className="font-semibold">Cambios</h2>

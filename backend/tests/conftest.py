@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.config import Settings
 from app.db import Base, get_db
 from app.main import app
+from app.models import User
 from app.ratelimit import limiter
 
 
@@ -31,7 +32,12 @@ def engine():
 
 @pytest.fixture
 def db(engine):
+    """Sesión de servicio con un usuario ya fijado: los datos con dueño exigen saber de quién son."""
     with Session(engine) as s:
+        user = User(email="servicio@example.com", password_hash="x")
+        s.add(user)
+        s.commit()
+        s.info["user_id"] = user.id
         yield s
 
 
@@ -51,7 +57,19 @@ def client(engine):
 
 @pytest.fixture
 def authed(client):
+    """El primer usuario (administrador): se registra sin invitación."""
     creds = {"email": "yo@example.com", "password": "clave-segura-123"}
     assert client.post("/api/auth/register", json=creds).status_code == 201
     assert client.post("/api/auth/login", json=creds).status_code == 200
     return client
+
+
+@pytest.fixture
+def otro(authed):
+    """Una segunda persona, con su propia sesión, que entra con una invitación del administrador."""
+    code = authed.post("/api/auth/invites").json()["code"]
+    b = TestClient(app)
+    creds = {"email": "otra@example.com", "password": "otra-clave-segura-1"}
+    assert b.post("/api/auth/register", json={**creds, "invite_code": code}).status_code == 201
+    assert b.post("/api/auth/login", json=creds).status_code == 200
+    return b

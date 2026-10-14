@@ -43,7 +43,7 @@ def test_registrar_crea_las_categorias_por_defecto(client):
 def test_config_publica_no_expone_secretos(client):
     r = client.get("/api/config")
     assert r.status_code == 200
-    assert set(r.json()) == {"email_enabled", "analytics_url"}
+    assert set(r.json()) == {"email_enabled", "analytics_url", "registration"}
 
 
 # ---------- recuperar contraseña ----------

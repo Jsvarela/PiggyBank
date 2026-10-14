@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from sqlalchemy import func, select
 
 from app.errors import DomainError
 from app.models import Account, AccountType, SavingsGoal, Transaction, TxType
@@ -54,7 +55,7 @@ def test_aportar_exige_cuenta_de_ahorro_en_la_meta(db):
     banco, _, goal = setup(db, with_account=False)
     with pytest.raises(DomainError):
         contribute(db, goal, banco.id, 1_000, HOY)
-    assert db.query(Transaction).count() == 0
+    assert db.scalar(select(func.count()).select_from(Transaction)) == 0
 
 
 def test_no_se_aporta_desde_la_cuenta_de_la_meta(db):

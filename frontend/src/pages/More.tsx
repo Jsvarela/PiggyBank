@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useMe } from '../api/hooks'
 import BackupPanel from '../components/BackupPanel'
 import InstallApp from '../components/InstallApp'
 import ThemeToggle from '../components/ThemeToggle'
@@ -12,10 +13,11 @@ const links = [
 ] as const
 
 export default function More() {
+  const admin = useMe().data?.is_admin
   return (
     <div className="space-y-4">
       <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
-        {links.map(([to, title, hint]) => (
+        {[...links, ...(admin ? ([['/invitar', 'Invitar', 'Da acceso a otra persona con un código']] as const) : [])].map(([to, title, hint]) => (
           <li key={to}>
             <Link to={to} className="block py-3">
               <span className="block font-medium">{title}</span>

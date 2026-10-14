@@ -9,7 +9,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import SessionLocal
-from app.models import Account, AccountType, Category, CategoryKind, Transaction, TxType
+from app.models import Account, AccountType, Category, CategoryKind, Transaction, TxType, User
+from app.security import hash_password
 from app.timeutil import today_bogota
 
 EXPENSE = ["Comida", "Transporte", "Vivienda", "Servicios", "Universidad", "Ocio", "Salud", "Suscripciones", "Otros"]
@@ -50,8 +51,20 @@ def seed_demo(db: Session) -> None:
     db.commit()
 
 
+def _owner(session: Session) -> User:
+    """Los datos tienen dueño: se siembran para el primer usuario (o uno de desarrollo si aún no hay ninguno)."""
+    user = session.scalar(select(User).order_by(User.id))
+    if user is None:
+        user = User(email="demo@localhost.test", password_hash=hash_password("demo-local-12345"), is_admin=True)
+        session.add(user)
+        session.commit()
+        print("Creé el usuario de desarrollo demo@localhost.test (clave en app/seed.py)")
+    return user
+
+
 if __name__ == "__main__":
     with SessionLocal() as session:
+        session.info["user_id"] = _owner(session).id
         seed_categories(session)
         if "--demo" in sys.argv:
             seed_demo(session)

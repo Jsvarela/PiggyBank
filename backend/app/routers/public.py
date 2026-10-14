@@ -1,9 +1,13 @@
 import logging
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.db import get_db
+from app.models import User
 from app.ratelimit import limiter
 
 router = APIRouter(tags=["public"])
@@ -11,9 +15,14 @@ client_log = logging.getLogger("finanzas.client")
 
 
 @router.get("/config")
-def public_config() -> dict[str, object]:
+def public_config(db: Session = Depends(get_db)) -> dict[str, object]:
     """Ajustes que el navegador necesita saber. Nada secreto: solo qué funciones están activas."""
-    return {"email_enabled": settings.email_enabled, "analytics_url": settings.analytics_url or None}
+    hay_usuarios = db.scalar(select(func.count()).select_from(User)) > 0
+    return {
+        "email_enabled": settings.email_enabled,
+        "analytics_url": settings.analytics_url or None,
+        "registration": "invite" if hay_usuarios else "first",  # "first": aún no hay nadie, el primero entra sin código
+    }
 
 
 class ClientError(BaseModel):

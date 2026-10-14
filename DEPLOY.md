@@ -94,3 +94,10 @@ Pide la contraseña nueva y cierra todas las sesiones abiertas.
 docker build -t finanzas .
 docker run --rm -p 8000:8000 -e DATABASE_URL=sqlite:////tmp/f.db finanzas
 ```
+
+## Varias personas (multiusuario)
+- **Antes de desplegar la migración multiusuario, descarga un respaldo JSON** (Más → Respaldo). La migración asigna todos los datos existentes al primer usuario, que pasa a ser admin.
+- Invitar: Más → Invitar (solo admin). Cada enlace sirve una vez y vence en 7 días.
+- Contraseña olvidada sin correo configurado: `uv run python -m app.reset_password <correo>` (ahora hay varios usuarios).
+- Volver al código anterior después de migrar exige `alembic downgrade f2e66f436831` (las columnas `user_id` son NOT NULL).
+- Capacidad: ~10 personas caben en Render + Neon gratis; el límite de login es por IP, así que una casa con la misma red podría rozarlo.

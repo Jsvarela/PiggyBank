@@ -1,9 +1,10 @@
 from datetime import date
 
 from sqlalchemy import func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.errors import DomainError
+from app.errors import Conflict, DomainError
 from app.models import Account, Category, Transaction, TxType
 from app.schemas import TransactionIn
 from app.services.catalog import get_or_404
@@ -21,6 +22,15 @@ def check_refs(db: Session, data) -> None:
             raise DomainError("La categoría no corresponde al tipo de movimiento")
 
 
+def _commit_unique_id(db: Session) -> None:
+    """El id (UUID que genera el cliente) es único en TODA la base. Si ya lo usa otra persona, no se pisa ni se revela."""
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise Conflict("Ese identificador ya está en uso") from None
+
+
 def save_transaction(
     db: Session, data: TransactionIn, tx: Transaction | None = None
 ) -> Transaction:
@@ -33,7 +43,7 @@ def save_transaction(
     for k, v in values.items():
         setattr(tx, k, v)
     db.add(tx)
-    db.commit()
+    _commit_unique_id(db)
     return tx
 
 
@@ -45,7 +55,7 @@ def save_transactions(db: Session, items: list[TransactionIn]) -> int:
         values = data.model_dump(exclude={"id"})
         values["date"] = data.date or today_bogota()
         db.add(Transaction(**({"id": data.id} if data.id else {}), **values))
-    db.commit()
+    _commit_unique_id(db)
     return len(items)
 
 
