@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { formatDate } from '../lib/format'
+import { formatDate, plural } from '../lib/format'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
@@ -223,7 +223,7 @@ export default function ImportCsv() {
             ))}
           </ul>
           <button disabled={busy || chosen.length === 0} className="w-full rounded-lg bg-brand py-2 text-white disabled:opacity-60" onClick={confirm}>
-            Importar {chosen.length} movimientos
+            Importar {plural(chosen.length, 'movimiento', 'movimientos')}
           </button>
         </section>
       )}

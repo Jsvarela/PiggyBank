@@ -31,7 +31,7 @@ export default function Transactions() {
           <input type="date" className={`mt-0.5 w-full ${input}`} value={f.to ?? ''} onChange={(e) => set({ to: e.target.value || undefined })} />
         </label>
         <select aria-label="Cuenta" className={input} value={f.account_id ?? ''} onChange={(e) => set({ account_id: num(e.target.value) })}>
-          <option value="">Todas las cuentas</option>
+          <option value="">Cuenta</option>
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
@@ -39,7 +39,7 @@ export default function Transactions() {
           ))}
         </select>
         <select aria-label="Categoría" className={input} value={f.category_id ?? ''} onChange={(e) => set({ category_id: num(e.target.value) })}>
-          <option value="">Todas las categorías</option>
+          <option value="">Categoría</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -70,7 +70,7 @@ export default function Transactions() {
         </ul>
       </section>
 
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <button className="rounded-lg border px-3 py-2 disabled:opacity-40" disabled={f.offset === 0} onClick={() => setF({ ...f, offset: Math.max(0, f.offset - PAGE) })}>
           Anterior
         </button>

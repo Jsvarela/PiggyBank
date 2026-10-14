@@ -1,6 +1,6 @@
 import { useAccounts, useCategories } from '../api/hooks'
-import { formatDate } from '../lib/format'
 import type { Transaction } from '../api/types'
+import { formatDate } from '../lib/format'
 import { formatCOP } from '../lib/money'
 import { useEditor } from './editor'
 
@@ -17,14 +17,16 @@ export default function TransactionRow({ tx }: { tx: Transaction }) {
 
   return (
     <li>
-      <button className="flex w-full items-center justify-between py-2 text-left" onClick={() => open(tx)}>
-        <span>
-          <span className="block">{title}</span>
-          <span className="block text-xs text-slate-500">
+      {/* El texto puede ser larguísimo o no tener espacios (una referencia bancaria): se corta en 2 líneas
+          y el monto nunca cede ni se sale de la pantalla. El texto completo se ve al abrir el movimiento. */}
+      <button className="flex w-full items-start justify-between gap-3 py-2 text-left" onClick={() => open(tx)}>
+        <span className="min-w-0">
+          <span className="line-clamp-2 [overflow-wrap:anywhere]">{title}</span>
+          <span className="line-clamp-2 text-xs text-slate-500 [overflow-wrap:anywhere]">
             {formatDate(tx.date)} · {sub}
           </span>
         </span>
-        <span className={color}>
+        <span className={`shrink-0 whitespace-nowrap ${color}`}>
           {tx.type === 'expense' ? '-' : tx.type === 'income' ? '+' : ''}
           {formatCOP(tx.amount)}
         </span>

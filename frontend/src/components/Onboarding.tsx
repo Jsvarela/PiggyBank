@@ -5,13 +5,14 @@ import { Link } from 'react-router-dom'
 import { z } from 'zod'
 import { useApiMutation } from '../api/hooks'
 import { ACCOUNT_TYPES, type AccountBody, type AccountType } from '../api/types'
+import { MAX_MONEY, MONEY_TOO_BIG } from '../lib/money'
 import { useEditor } from './editor'
 
 const KEY = 'onboardingHidden'
 const schema = z.object({
   name: z.string().trim().min(1, 'Ponle un nombre'),
   type: z.enum(['cash', 'bank', 'digital_wallet', 'credit_card', 'savings']),
-  initial_balance: z.number({ error: 'Ingresa un número (puede ser 0)' }).int('Sin decimales'),
+  initial_balance: z.number({ error: 'Ingresa un número (puede ser 0)' }).int('Sin decimales').min(-MAX_MONEY, MONEY_TOO_BIG).max(MAX_MONEY, MONEY_TOO_BIG),
   archived: z.boolean(),
 })
 

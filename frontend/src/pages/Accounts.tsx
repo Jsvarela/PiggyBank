@@ -5,12 +5,12 @@ import { z } from 'zod'
 import { useAccounts, useApiMutation } from '../api/hooks'
 import { ACCOUNT_TYPES, type Account, type AccountBody, type AccountType } from '../api/types'
 import Loading from '../components/Loading'
-import { formatCOP } from '../lib/money'
+import { MAX_MONEY, MONEY_TOO_BIG, formatCOP } from '../lib/money'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Escribe un nombre'),
   type: z.enum(['cash', 'bank', 'digital_wallet', 'credit_card', 'savings']),
-  initial_balance: z.number({ error: 'Ingresa un número' }).int('Sin decimales'),
+  initial_balance: z.number({ error: 'Ingresa un número' }).int('Sin decimales').min(-MAX_MONEY, MONEY_TOO_BIG).max(MAX_MONEY, MONEY_TOO_BIG),
   archived: z.boolean(),
 })
 
@@ -77,11 +77,11 @@ export default function Accounts() {
       <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {accounts.map((a) => (
           <li key={a.id}>
-            <button className="flex w-full justify-between py-3 text-left" onClick={() => setEditing(a)}>
-              <span>
+            <button className="flex w-full items-start justify-between gap-3 py-3 text-left" onClick={() => setEditing(a)}>
+              <span className="min-w-0 [overflow-wrap:anywhere]">
                 {a.name} <span className="text-xs text-slate-500">{ACCOUNT_TYPES[a.type]}{a.archived && ' · archivada'}</span>
               </span>
-              <span className={a.balance < 0 ? 'text-red-700' : ''}>{formatCOP(a.balance)}</span>
+              <span className={`shrink-0 whitespace-nowrap ${a.balance < 0 ? 'text-red-700' : ''}`}>{formatCOP(a.balance)}</span>
             </button>
           </li>
         ))}

@@ -10,14 +10,15 @@ import { EditorContext } from './editor'
 import PendingBanner from './PendingBanner'
 import Ready from './Ready'
 import VerifyBanner from './VerifyBanner'
+import NavIcon from './NavIcon'
 import QuickAdd from './QuickAdd'
 
 const links = [
-  ['/', 'Inicio'],
-  ['/movimientos', 'Movimientos'],
-  ['/presupuestos', 'Presupuestos'],
-  ['/metas', 'Metas'],
-  ['/mas', 'Más'],
+  ['/', 'Inicio', 'inicio'],
+  ['/movimientos', 'Movimientos', 'movimientos'],
+  ['/presupuestos', 'Presupuestos', 'presupuestos'],
+  ['/metas', 'Metas', 'metas'],
+  ['/mas', 'Más', 'mas'],
 ] as const
 
 const TITLES: Record<string, string> = {
@@ -71,7 +72,7 @@ export default function Layout() {
 
   return (
     <EditorContext.Provider value={(tx) => setEditing(tx ?? null)}>
-      <div className="min-h-dvh bg-slate-50 pb-32 text-slate-900">
+      <div className="min-h-dvh bg-slate-50 pb-40 text-slate-900">
         <header className="bg-surface pt-[env(safe-area-inset-top)] shadow-sm">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
             <span className="flex items-baseline gap-2">
@@ -102,7 +103,7 @@ export default function Layout() {
         </main>
 
         {/* el botón "+" se alinea con el contenido, no con el borde de la pantalla */}
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-10">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-10">
           <div className="mx-auto flex max-w-2xl justify-end px-4">
             <button
               aria-label="Nuevo movimiento"
@@ -115,17 +116,20 @@ export default function Layout() {
         </div>
         <nav className="fixed inset-x-0 bottom-0 border-t bg-surface pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto flex max-w-2xl">
-            {links.map(([to, label]) => (
-              <NavLink
-                key={to}
-                to={to}
-                end
-                className={({ isActive }) => {
+            {/* cada pestaña mide 64 px de alto (el mínimo cómodo para el pulgar es 48) y trae ícono + nombre */}
+            {links.map(([to, label, icon]) => (
+              <NavLink key={to} to={to} end className="flex min-h-16 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1.5">
+                {({ isActive }) => {
                   const active = isActive || (to === '/mas' && isSub) // las subpantallas pertenecen a "Más"
-                  return `flex-1 py-3 text-center text-xs ${active ? 'font-semibold text-emerald-700' : 'text-slate-600'}`
+                  return (
+                    <>
+                      <span className={`flex h-8 w-14 items-center justify-center rounded-full ${active ? 'bg-brand/15 text-emerald-700' : 'text-slate-600'}`}>
+                        <NavIcon name={icon} />
+                      </span>
+                      <span className={`text-[11px] leading-tight max-[340px]:text-[10px] ${active ? 'font-semibold text-emerald-700' : 'text-slate-600'}`}>{label}</span>
+                    </>
+                  )
                 }}
-              >
-                {label}
               </NavLink>
             ))}
           </div>

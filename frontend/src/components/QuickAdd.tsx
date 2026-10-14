@@ -7,7 +7,7 @@ import { api } from '../api/client'
 import { useAccounts, useApiMutation, useCategories } from '../api/hooks'
 import { TX_TYPES, type Transaction, type TransactionBody, type TxType } from '../api/types'
 import { todayBogota } from '../lib/dates'
-import { formatCOP } from '../lib/money'
+import { MAX_MONEY, MONEY_TOO_BIG, formatCOP } from '../lib/money'
 import { createTransaction } from '../lib/offlineQueue'
 
 const LAST_ACCOUNT = 'lastAccountId'
@@ -15,7 +15,7 @@ const LAST_ACCOUNT = 'lastAccountId'
 const schema = z
   .object({
     type: z.enum(['expense', 'income', 'transfer']),
-    amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0'),
+    amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0').max(MAX_MONEY, MONEY_TOO_BIG),
     date: z.string().min(1, 'Elige una fecha'),
     account_id: z.number({ error: 'Elige una cuenta' }),
     to_account_id: z.number().nullable(),
@@ -201,21 +201,23 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
           <input placeholder="Descripción (opcional)" className="min-w-0 flex-1 rounded-lg border border-slate-300 p-2" {...register('description')} />
         </div>
 
-        {(save.error || del.error) && <p className="text-sm text-red-600">{(save.error ?? del.error)?.message}</p>}
-
-        <div className="flex gap-2">
-          {tx && (
-            <button
-              type="button"
-              className="rounded-lg border border-red-300 px-4 py-3 text-red-700"
-              onClick={() => confirm('¿Borrar este movimiento?') && del.mutate(tx.id, { onSuccess: onClose })}
-            >
-              Borrar
+        {/* pie fijo: con muchas categorías o cuentas la hoja se desplaza, pero Guardar siempre queda a la vista */}
+        <div className="sticky bottom-0 -mx-4 space-y-2 border-t bg-surface px-4 pt-3">
+          {(save.error || del.error) && <p className="text-sm text-red-600">{(save.error ?? del.error)?.message}</p>}
+          <div className="flex gap-2">
+            {tx && (
+              <button
+                type="button"
+                className="rounded-lg border border-red-300 px-4 py-3 text-red-700"
+                onClick={() => confirm('¿Borrar este movimiento?') && del.mutate(tx.id, { onSuccess: onClose })}
+              >
+                Borrar
+              </button>
+            )}
+            <button type="submit" disabled={save.isPending} className="flex-1 rounded-lg bg-brand py-3 font-medium text-white disabled:opacity-60">
+              {save.isPending ? 'Guardando…' : 'Guardar'}
             </button>
-          )}
-          <button type="submit" disabled={save.isPending} className="flex-1 rounded-lg bg-brand py-3 font-medium text-white disabled:opacity-60">
-            {save.isPending ? 'Guardando…' : 'Guardar'}
-          </button>
+          </div>
         </div>
       </form>
     </div>

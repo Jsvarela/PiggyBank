@@ -5,6 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
 from app.models import AccountType, CategoryKind, Frequency, TxType
 
+# Tope de todo monto: 15 cifras (999 billones de pesos). Es menos que 2^53, así que JavaScript lo representa
+# exacto (por encima redondea en silencio y mostraría un monto falso), y cabe de sobra en un bigint.
+MAX_MONEY = 999_999_999_999_999
 EMAIL = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
 
@@ -22,7 +25,7 @@ class UserOut(BaseModel):
 class AccountIn(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     type: AccountType
-    initial_balance: StrictInt = 0
+    initial_balance: StrictInt = Field(default=0, ge=-MAX_MONEY, le=MAX_MONEY)
     color: str | None = None
     icon: str | None = None
     archived: bool = False
@@ -62,7 +65,7 @@ def check_coherence(m) -> None:
 class TransactionIn(BaseModel):
     id: str | None = Field(default=None, max_length=36)
     type: TxType
-    amount: StrictInt = Field(gt=0)
+    amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     date: dt.date | None = None  # por defecto: hoy en Bogotá
     account_id: int
     to_account_id: int | None = None
@@ -98,7 +101,7 @@ class TransactionPage(BaseModel):
 
 class RecurringIn(BaseModel):
     type: TxType
-    amount: StrictInt = Field(gt=0)
+    amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     account_id: int
     to_account_id: int | None = None
     category_id: int | None = None
@@ -135,7 +138,7 @@ class UpcomingPayment(BaseModel):
 
 class GoalIn(BaseModel):
     name: str = Field(min_length=1, max_length=100)
-    target_amount: StrictInt = Field(gt=0)
+    target_amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     deadline: dt.date | None = None
     account_id: int | None = None
 
@@ -150,7 +153,7 @@ class GoalOut(GoalIn):
 
 
 class ContributionIn(BaseModel):
-    amount: StrictInt = Field(gt=0)
+    amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     from_account_id: int
     date: dt.date | None = None
 
@@ -161,7 +164,7 @@ MONTH = r"^\d{4}-(0[1-9]|1[0-2])$"
 class BudgetIn(BaseModel):
     category_id: int
     month: str | None = Field(default=None, pattern=MONTH)  # None = se repite cada mes
-    limit_amount: StrictInt = Field(gt=0)
+    limit_amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     alert_threshold: StrictInt = Field(default=80, ge=1, le=100)
 
 

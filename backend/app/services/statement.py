@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import DomainError
 from app.models import Account, Transaction, TxType
+from app.schemas import MAX_MONEY
 from app.services.catalog import get_or_404
 
 MAX_ROWS = 5000
@@ -148,6 +149,8 @@ def _parse_row(line: int, cells: list[str], m: Mapping) -> PreviewRow:
         row.type = kind
         if row.amount == 0:
             raise ValueError("Monto vacío o cero")
+        if row.amount > MAX_MONEY:
+            raise ValueError("Monto demasiado grande")
     except ValueError as e:
         row.error = str(e)
     return row

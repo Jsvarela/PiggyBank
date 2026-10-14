@@ -11,3 +11,9 @@ export function formatDate(iso: string): string {
   const [y, m, d] = iso.split('-')
   return `${Number(d)} ${MESES[Number(m) - 1].slice(0, 3)} ${y}`
 }
+
+/** Porcentajes de presupuesto: por encima de 999 solo importa que se pasó, no por cuánto. */
+export const formatPercent = (p: number) => (p > 999 ? '>999%' : `${p}%`)
+
+/** `plural(1, 'día', 'días')` -> '1 día'; `plural(2, 'día', 'días')` -> '2 días' */
+export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`

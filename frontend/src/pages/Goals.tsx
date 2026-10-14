@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { formatDate } from '../lib/format'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -7,11 +6,12 @@ import { useAccounts, useApiMutation, useGoals } from '../api/hooks'
 import type { Goal, GoalBody } from '../api/types'
 import Loading from '../components/Loading'
 import Ready from '../components/Ready'
-import { formatCOP } from '../lib/money'
+import { formatDate, formatPercent } from '../lib/format'
+import { MAX_MONEY, MONEY_TOO_BIG, formatCOP } from '../lib/money'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Escribe un nombre'),
-  target_amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0'),
+  target_amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0').max(MAX_MONEY, MONEY_TOO_BIG),
   deadline: z.string(),
   account_id: z.number().nullable(),
 })
@@ -70,7 +70,7 @@ function GoalForm({ goal, onDone }: { goal?: Goal; onDone: () => void }) {
 }
 
 const contributeSchema = z.object({
-  amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0'),
+  amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0').max(MAX_MONEY, MONEY_TOO_BIG),
   from_account_id: z.number({ error: 'Elige una cuenta' }),
 })
 type ContributeValues = z.infer<typeof contributeSchema>
@@ -131,22 +131,23 @@ export default function Goals() {
       )}
       {goals.map((g) => (
         <section key={g.id} className="rounded-xl bg-surface p-4 shadow-sm">
-          <div className="flex justify-between">
-            <span className="flex items-baseline gap-2">
-              <span className="font-medium">{g.name}</span>
-              <button className="text-xs text-slate-600 underline" onClick={() => setEditing(g)}>
+          {/* nombre + «Editar» a la izquierda; los montos pasan a la línea de abajo si no caben */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+            <span className="flex min-w-0 grow basis-40 items-baseline gap-2">
+              <span className="min-w-0 font-medium [overflow-wrap:anywhere]">{g.name}</span>
+              <button className="shrink-0 text-xs text-slate-600 underline" onClick={() => setEditing(g)}>
                 Editar
               </button>
             </span>
             <span className="text-sm text-slate-600">
-              {formatCOP(g.saved)} / {formatCOP(g.target_amount)}
+              <span className="whitespace-nowrap">{formatCOP(g.saved)}</span> / <span className="whitespace-nowrap">{formatCOP(g.target_amount)}</span>
             </span>
           </div>
           <div className="my-2 h-2 rounded bg-slate-200">
             <div className={`h-2 rounded ${g.reached ? 'bg-brand' : 'bg-sky-500'}`} style={{ width: `${Math.min(g.percent, 100)}%` }} />
           </div>
           <p className="text-xs text-slate-500">
-            {g.reached ? '¡Meta cumplida!' : `${g.percent}% · faltan ${formatCOP(g.remaining)}`}
+            {g.reached ? '¡Meta cumplida!' : `${formatPercent(g.percent)} · faltan ${formatCOP(g.remaining)}`}
             {!g.reached && g.monthly_suggested !== null && ` · sugerido ${formatCOP(g.monthly_suggested)} al mes`}
             {g.deadline && ` · hasta ${formatDate(g.deadline)}`}
           </p>

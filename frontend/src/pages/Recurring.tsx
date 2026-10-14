@@ -11,12 +11,12 @@ import Loading from '../components/Loading'
 import Ready from '../components/Ready'
 import UpcomingList from '../components/UpcomingList'
 import { todayBogota } from '../lib/dates'
-import { formatCOP } from '../lib/money'
+import { MAX_MONEY, MONEY_TOO_BIG, formatCOP } from '../lib/money'
 
 const schema = z
   .object({
     type: z.enum(['expense', 'income', 'transfer']),
-    amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0'),
+    amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0').max(MAX_MONEY, MONEY_TOO_BIG),
     account_id: z.number({ error: 'Elige una cuenta' }),
     to_account_id: z.number().nullable(),
     category_id: z.number().nullable(),
@@ -203,15 +203,15 @@ export default function Recurring() {
         <ul className="divide-y">
           {rules.map((r) => (
             <li key={r.id}>
-              <button className="flex w-full justify-between py-2 text-left" onClick={() => setEditing(r)}>
-                <span>
-                  <span className="block">{r.description || TX_TYPES[r.type]}</span>
+              <button className="flex w-full items-start justify-between gap-3 py-2 text-left" onClick={() => setEditing(r)}>
+                <span className="min-w-0">
+                  <span className="line-clamp-2 [overflow-wrap:anywhere]">{r.description || TX_TYPES[r.type]}</span>
                   <span className="block text-xs text-slate-500">
                     {FREQUENCIES[r.frequency]} · próxima {formatDate(r.next_run_date)}
                     {!r.active && ' · pausada'}
                   </span>
                 </span>
-                <span>{formatCOP(r.amount)}</span>
+                <span className="shrink-0 whitespace-nowrap">{formatCOP(r.amount)}</span>
               </button>
             </li>
           ))}

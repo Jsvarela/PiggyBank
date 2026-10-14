@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { formatMonth } from '../lib/format'
+import { formatMonth, formatPercent, plural } from '../lib/format'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -7,11 +7,11 @@ import { useApiMutation, useBudgetStatus, useCategories, useMonthlyReport } from
 import type { BudgetBody, BudgetStatus } from '../api/types'
 import Loading from '../components/Loading'
 import { todayBogota } from '../lib/dates'
-import { formatCOP } from '../lib/money'
+import { MAX_MONEY, MONEY_TOO_BIG, formatCOP } from '../lib/money'
 
 const schema = z.object({
   category_id: z.number({ error: 'Elige una categoría' }),
-  limit_amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0'),
+  limit_amount: z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0').max(MAX_MONEY, MONEY_TOO_BIG),
   alert_threshold: z.number().int().min(1).max(100),
   repeat: z.boolean(),
 })
@@ -117,17 +117,18 @@ export default function Budgets() {
         )}
         {status.map((b) => (
           <button key={b.budget_id} className="block w-full rounded-xl bg-surface p-3 text-left shadow-sm" onClick={() => setEditing(b)}>
-            <div className="flex justify-between">
-              <span>{b.category_name}</span>
+            {/* nombre y montos comparten la fila; si no caben, los montos pasan a la línea de abajo (y solo se parten en el "/") */}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+              <span className="min-w-0 grow basis-40 [overflow-wrap:anywhere]">{b.category_name}</span>
               <span className="text-sm text-slate-600">
-                {formatCOP(b.spent)} / {formatCOP(b.limit)}
+                <span className="whitespace-nowrap">{formatCOP(b.spent)}</span> / <span className="whitespace-nowrap">{formatCOP(b.limit)}</span>
               </span>
             </div>
             <div className="my-2 h-2 rounded bg-slate-200">
               <div className={`h-2 rounded ${BAR[b.alert]}`} style={{ width: `${Math.min(b.percent, 100)}%` }} />
             </div>
             <p className={`text-xs ${b.alert === 'exceeded' ? 'text-red-700' : 'text-slate-500'}`}>
-              {b.percent}% · {b.remaining >= 0 ? `quedan ${formatCOP(b.remaining)}` : `te pasaste ${formatCOP(-b.remaining)}`} · {b.days_left} días restantes
+              {formatPercent(b.percent)} · {b.remaining >= 0 ? `quedan ${formatCOP(b.remaining)}` : `te pasaste ${formatCOP(-b.remaining)}`} · {plural(b.days_left, 'día restante', 'días restantes')}
               {b.is_default && ' · se repite cada mes'}
             </p>
           </button>
@@ -143,11 +144,11 @@ export default function Budgets() {
           {report.categories.length === 0 && <p className="text-sm text-slate-500">Sin gastos.</p>}
           <ul className="divide-y">
             {report.categories.map((c) => (
-              <li key={c.category_id} className="flex justify-between py-2 text-sm">
-                <span>{c.name}</span>
-                <span>
-                  {formatCOP(c.amount)}{' '}
-                  <span className={c.diff > 0 ? 'text-red-700' : c.diff < 0 ? 'text-emerald-700' : 'text-slate-500'}>
+              <li key={c.category_id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 py-2 text-sm">
+                <span className="min-w-0 grow basis-32 [overflow-wrap:anywhere]">{c.name}</span>
+                <span className="text-right">
+                  <span className="whitespace-nowrap">{formatCOP(c.amount)}</span>{' '}
+                  <span className={`whitespace-nowrap ${c.diff > 0 ? 'text-red-700' : c.diff < 0 ? 'text-emerald-700' : 'text-slate-500'}`}>
                     ({c.diff > 0 ? '+' : ''}
                     {formatCOP(c.diff)})
                   </span>

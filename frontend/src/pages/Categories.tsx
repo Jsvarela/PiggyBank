@@ -78,13 +78,13 @@ export default function Categories() {
       <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {categories.map((c) => (
           <li key={c.id}>
-            <button className="flex w-full justify-between py-3 text-left" onClick={() => setEditing(c)}>
-              <span>
+            <button className="flex w-full items-start justify-between gap-3 py-3 text-left" onClick={() => setEditing(c)}>
+              <span className="min-w-0 [overflow-wrap:anywhere]">
                 {c.parent_id ? '↳ ' : ''}
                 {c.name}
                 {c.archived && <span className="text-xs text-slate-500"> · archivada</span>}
               </span>
-              <span className="text-xs text-slate-500">{c.kind === 'income' ? 'Ingreso' : 'Gasto'}</span>
+              <span className="shrink-0 text-xs text-slate-500">{c.kind === 'income' ? 'Ingreso' : 'Gasto'}</span>
             </button>
           </li>
         ))}
