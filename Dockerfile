@@ -16,4 +16,6 @@ COPY --from=web /web/dist /app/static
 ENV STATIC_DIR=/app/static PATH="/app/.venv/bin:$PATH"
 USER app
 # Render define $PORT. Las migraciones corren en cada arranque (alembic no repite las ya aplicadas).
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# --proxy-headers: detrás del proxy de Render, la IP real del visitante viene en X-Forwarded-For;
+# sin esto el límite de intentos de login lo compartiría todo el mundo (y un atacante podría bloquearte).
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]

@@ -31,6 +31,7 @@ Variables (todas en el panel de Render):
 | `DATABASE_URL` | cadena de Neon |
 | `SECRET_KEY` | aleatoria y larga (la genera Render). Si la cambias, todas las sesiones se cierran |
 | `COOKIE_SECURE` | `true` (la app **se niega a arrancar** en producción con la clave de ejemplo) |
+| `SMTP_*`, `ANALYTICS_URL` | opcionales, ver secciones 6 y 8 |
 
 ## 3. Instalar en el celular
 - **Android (Chrome):** menú ⋮ → *Instalar app*, o el botón en **Más → Instalar app**.
@@ -47,6 +48,46 @@ Un servicio encendido todo el mes gasta ~730 de las 750 horas gratuitas, así qu
 Neon gratis guarda solo 6 horas de historial. Entra a **Más → Respaldo y exportación** y descarga el
 **respaldo JSON** de vez en cuando (por ejemplo, el día 1 de cada mes). Se restaura desde la misma pantalla.
 El CSV es para abrir en Excel.
+
+**Respaldo automático (opcional).** El flujo `.github/workflows/backup.yml` descarga el respaldo cada
+domingo y lo guarda 90 días como *artifact* del repositorio. Para activarlo, en GitHub →
+*Settings → Secrets and variables → Actions* crea: `APP_URL` (tu URL de Render), `BACKUP_EMAIL` y
+`BACKUP_PASSWORD` (tu usuario). Requisitos: el repositorio debe ser **privado** (el archivo contiene tus datos)
+y debes aceptar guardar tu contraseña como secreto de GitHub. Para probarlo: *Actions → Respaldo semanal → Run workflow*.
+
+## 6. Correo: recuperar contraseña y verificar correo (opcional pero recomendado)
+Sin correo configurado la app funciona, pero **no se puede recuperar la contraseña por correo** (ver sección 7).
+Cualquier servicio SMTP sirve; opciones con plan gratuito (verifica el plan vigente):
+
+| Servicio | `SMTP_HOST` | Notas |
+| :--- | :--- | :--- |
+| Brevo | `smtp-relay.brevo.com` | Plan gratis con tope diario; usa tu clave SMTP, no la de la cuenta |
+| Gmail | `smtp.gmail.com` | Requiere verificación en dos pasos y una «contraseña de aplicación» |
+
+Variables en Render (todas opcionales; basta con `SMTP_HOST` para activar la función):
+
+| Variable | Valor |
+| :--- | :--- |
+| `SMTP_HOST` | servidor SMTP |
+| `SMTP_PORT` | `587` (STARTTLS, por defecto) |
+| `SMTP_USER` / `SMTP_PASSWORD` | credenciales SMTP |
+| `SMTP_FROM` | remitente, p. ej. `Finanzas <tucorreo@gmail.com>` |
+| `APP_URL` | solo si usas dominio propio; en Render se toma sola |
+
+## 7. Olvidé mi contraseña y no tengo correo configurado
+Desde tu computador, apuntando a la base de datos de Neon (la misma `DATABASE_URL` de Render):
+```bash
+cd backend
+DATABASE_URL="postgresql://..." uv run python -m app.reset_password
+```
+Pide la contraseña nueva y cierra todas las sesiones abiertas.
+
+## 8. Errores y estadísticas
+- **Errores:** los de la API quedan en el log de Render (*Logs*). Los del navegador (pantalla en blanco, fallos de JavaScript)
+  se envían a `/api/client-errors` y aparecen en el mismo log con el prefijo `finanzas.client`. No hay alertas ni agrupación:
+  para eso existe Sentry (plan gratis), que se podría conectar después.
+- **Estadísticas (apagadas por defecto):** crea una cuenta gratis en goatcounter.com (uso personal) y define
+  `ANALYTICS_URL=https://TU-CODIGO.goatcounter.com/count`. Solo cuenta qué pantalla se visita; no usa cookies ni envía montos.
 
 ## Probar la imagen en tu PC (opcional, requiere Docker)
 ```bash

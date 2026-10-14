@@ -1,4 +1,6 @@
-from pydantic import field_validator, model_validator
+import os
+
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_SECRET = "cambia-esto-en-produccion-clave-de-desarrollo"
@@ -13,6 +15,22 @@ class Settings(BaseSettings):
     cookie_secure: bool = False  # True en producción (HTTPS)
     cookie_samesite: str = "lax"  # "none" solo si frontend y API estuvieran en dominios distintos
     static_dir: str = ""  # carpeta del frontend compilado; vacía en desarrollo (corre Vite aparte)
+
+    # Correo (recuperar contraseña y verificar correo). Sin SMTP_HOST esas funciones quedan apagadas.
+    smtp_host: str = ""
+    smtp_port: int = 587  # STARTTLS
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    # Base de los enlaces de los correos. En Render se toma sola de RENDER_EXTERNAL_URL.
+    app_url: str = Field(default_factory=lambda: os.environ.get("RENDER_EXTERNAL_URL", "http://localhost:5173"))
+
+    # Analítica opcional (GoatCounter, sin cookies): "https://TU-CODIGO.goatcounter.com/count". Vacía = apagada.
+    analytics_url: str = ""
+
+    @property
+    def email_enabled(self) -> bool:
+        return bool(self.smtp_host)
 
     @field_validator("database_url")
     @classmethod

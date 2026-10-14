@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useAccounts, useApiMutation } from '../api/hooks'
 import { ACCOUNT_TYPES, type Account, type AccountBody, type AccountType } from '../api/types'
+import Loading from '../components/Loading'
 import { formatCOP } from '../lib/money'
 
 const schema = z.object({
@@ -58,7 +59,8 @@ function AccountForm({ account, onDone }: { account?: Account; onDone: () => voi
 }
 
 export default function Accounts() {
-  const { data: accounts = [] } = useAccounts()
+  const query = useAccounts()
+  const accounts = query.data ?? []
   // undefined = cerrado, null = nueva, Account = editar
   const [editing, setEditing] = useState<Account | null | undefined>(undefined)
 
@@ -68,6 +70,10 @@ export default function Accounts() {
       <button className="w-full rounded-lg bg-brand py-2 text-white" onClick={() => setEditing(null)}>
         Nueva cuenta
       </button>
+      {query.isLoading && <Loading />}
+      {!query.isLoading && accounts.length === 0 && (
+        <p className="text-sm text-slate-500">Aún no tienes cuentas. Crea una por cada lugar donde guardas plata: efectivo, banco, Nequi, tarjeta…</p>
+      )}
       <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {accounts.map((a) => (
           <li key={a.id}>

@@ -14,9 +14,9 @@ class Credentials(BaseModel):
 
 
 class UserOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
     id: int
     email: str
+    email_verified: bool = False
 
 
 class AccountIn(BaseModel):

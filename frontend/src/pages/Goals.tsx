@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useAccounts, useApiMutation, useGoals } from '../api/hooks'
 import type { Goal, GoalBody } from '../api/types'
+import Loading from '../components/Loading'
 import Ready from '../components/Ready'
 import { formatCOP } from '../lib/money'
 
@@ -106,7 +107,8 @@ function ContributeForm({ goal, onDone }: { goal: Goal; onDone: () => void }) {
 }
 
 export default function Goals() {
-  const { data: goals = [] } = useGoals()
+  const goalsQuery = useGoals()
+  const goals = goalsQuery.data ?? []
   const accounts = useAccounts()
   // undefined = cerrado, null = nueva, Goal = editar
   const [editing, setEditing] = useState<Goal | null | undefined>(undefined)
@@ -123,7 +125,10 @@ export default function Goals() {
       <button className="w-full rounded-lg bg-brand py-2 text-white" onClick={() => setEditing(null)}>
         Nueva meta
       </button>
-      {goals.length === 0 && <p className="text-sm text-slate-500">Aún no tienes metas de ahorro.</p>}
+      {goalsQuery.isLoading && <Loading />}
+      {!goalsQuery.isLoading && goals.length === 0 && (
+        <p className="text-sm text-slate-500">Aún no tienes metas de ahorro. Crea una (un viaje, un celular, un fondo de emergencia) y ve cuánto te falta.</p>
+      )}
       {goals.map((g) => (
         <section key={g.id} className="rounded-xl bg-surface p-4 shadow-sm">
           <div className="flex justify-between">

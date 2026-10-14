@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useApiMutation, useCategories } from '../api/hooks'
 import type { Category, CategoryBody } from '../api/types'
+import Loading from '../components/Loading'
 import Ready from '../components/Ready'
 
 const schema = z.object({
@@ -73,6 +74,7 @@ export default function Categories() {
       <button className="w-full rounded-lg bg-brand py-2 text-white" onClick={() => setEditing(null)}>
         Nueva categoría
       </button>
+      {query.isLoading && <Loading />}
       <ul className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {categories.map((c) => (
           <li key={c.id}>

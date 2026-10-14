@@ -62,6 +62,9 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # sube cada vez que se debe invalidar toda sesión abierta (ver security.py)
+    token_version: Mapped[int] = mapped_column(default=0, server_default="0")
 
 
 class Account(Base):

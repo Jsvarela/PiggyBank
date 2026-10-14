@@ -8,6 +8,7 @@ const links = [
   ['/cuentas', 'Cuentas', 'Efectivo, bancos, billeteras y tarjetas'],
   ['/categorias', 'Categorías', 'Organiza tus ingresos y gastos'],
   ['/importar', 'Importar extracto', 'Carga movimientos desde un CSV de tu banco'],
+  ['/cuenta', 'Cuenta', 'Contraseña, sesiones, privacidad y eliminar cuenta'],
 ] as const
 
 export default function More() {

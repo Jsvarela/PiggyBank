@@ -75,3 +75,10 @@ export const useRecurring = () => useQuery({ queryKey: ['recurring'], queryFn: (
 export const useUpcoming = (days = 30) =>
   useQuery({ queryKey: ['upcoming', days], queryFn: () => api<UpcomingPayment[]>(`/recurring/upcoming?days=${days}`) })
 export const useGoals = () => useQuery({ queryKey: ['goals'], queryFn: () => api<Goal[]>('/savings-goals') })
+
+export const useConfig = () =>
+  useQuery({
+    queryKey: ['config'],
+    queryFn: () => api<{ email_enabled: boolean; analytics_url: string | null }>('/config'),
+    staleTime: Infinity,
+  })

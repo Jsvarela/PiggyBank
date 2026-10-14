@@ -86,11 +86,16 @@ def _ref(ids: dict[int, int], old: int | None, what: str) -> int | None:
     return ids[old]
 
 
+def wipe_data(db: Session) -> None:
+    """Borra todos los datos financieros (no el usuario), en orden de dependencias. No hace commit."""
+    for model in (Transaction, Budget, RecurringRule, SavingsGoal, Category, Account):
+        db.execute(delete(model))
+
+
 def restore_backup(db: Session, b: Backup) -> None:
     """Reemplaza TODOS los datos por los del respaldo, en una sola transacción."""
     try:
-        for model in (Transaction, Budget, RecurringRule, SavingsGoal, Category, Account):
-            db.execute(delete(model))
+        wipe_data(db)
 
         def add(obj):
             db.add(obj)

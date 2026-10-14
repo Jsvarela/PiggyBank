@@ -1,6 +1,7 @@
 import { useDashboard } from '../api/hooks'
 import { formatMonth } from '../lib/format'
 import BudgetAlerts from '../components/BudgetAlerts'
+import Onboarding from '../components/Onboarding'
 import TransactionRow from '../components/TransactionRow'
 import UpcomingList from '../components/UpcomingList'
 import { formatCOP } from '../lib/money'
@@ -13,6 +14,7 @@ export default function Home() {
   const accounts = data.accounts.filter((a) => !a.archived || a.balance !== 0)
   return (
     <div className="space-y-4">
+      <Onboarding hasAccount={data.accounts.some((a) => !a.archived)} hasTransaction={data.recent.length > 0} />
       <BudgetAlerts />
       <section className="rounded-xl bg-surface p-4 shadow-sm">
         <p className="text-sm text-slate-500">Patrimonio total</p>

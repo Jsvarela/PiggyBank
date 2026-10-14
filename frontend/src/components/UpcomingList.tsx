@@ -1,13 +1,15 @@
 import { useAccounts, useCategories, useUpcoming } from '../api/hooks'
 import { formatDate } from '../lib/format'
+import Loading from './Loading'
 import { formatCOP } from '../lib/money'
 
 /** Próximos pagos de las reglas recurrentes (los siguientes 30 días). */
 export default function UpcomingList({ limit }: { limit?: number }) {
-  const { data = [] } = useUpcoming(30)
+  const { data = [], isLoading } = useUpcoming(30)
   const accounts = useAccounts().data ?? []
   const categories = useCategories().data ?? []
   const items = limit ? data.slice(0, limit) : data
+  if (isLoading) return <Loading />
   if (items.length === 0) return <p className="text-sm text-slate-500">Sin pagos programados en los próximos 30 días.</p>
 
   return (

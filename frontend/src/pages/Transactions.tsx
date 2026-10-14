@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAccounts, useCategories, useTransactions } from '../api/hooks'
 import { TX_TYPES, type TransactionFilters, type TxType } from '../api/types'
+import Loading from '../components/Loading'
 import TransactionRow from '../components/TransactionRow'
 
 const PAGE = 20
@@ -10,7 +11,7 @@ export default function Transactions() {
   const [f, setF] = useState<TransactionFilters>({ limit: PAGE, offset: 0 })
   const accounts = useAccounts().data ?? []
   const categories = useCategories().data ?? []
-  const { data, isFetching } = useTransactions(f)
+  const { data, isFetching, isLoading, isError } = useTransactions(f)
   const total = data?.total ?? 0
 
   // cambiar un filtro vuelve a la primera página
@@ -56,7 +57,11 @@ export default function Transactions() {
       </div>
 
       <section className="rounded-xl bg-surface p-4 shadow-sm">
-        {data?.items.length === 0 && <p className="text-sm text-slate-500">Sin resultados.</p>}
+        {isLoading && <Loading />}
+        {isError && !data && <p className="text-sm text-red-600">No se pudieron cargar los movimientos. Revisa tu conexión.</p>}
+        {data?.items.length === 0 && (
+          <p className="text-sm text-slate-500">{f.q || f.from || f.to || f.account_id || f.category_id || f.type ? 'Ningún movimiento coincide con los filtros.' : 'Aún no hay movimientos. Usa el botón «+» para registrar el primero.'}</p>
+        )}
         <ul className={`divide-y ${isFetching ? 'opacity-60' : ''}`}>
           {data?.items.map((t) => (
             <TransactionRow key={t.id} tx={t} />

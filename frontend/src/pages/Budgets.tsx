@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { useApiMutation, useBudgetStatus, useCategories, useMonthlyReport } from '../api/hooks'
 import type { BudgetBody, BudgetStatus } from '../api/types'
+import Loading from '../components/Loading'
 import { todayBogota } from '../lib/dates'
 import { formatCOP } from '../lib/money'
 
@@ -85,7 +86,8 @@ function BudgetForm({ month, item, onDone }: { month: string; item?: BudgetStatu
 
 export default function Budgets() {
   const [month, setMonth] = useState(todayBogota().slice(0, 7))
-  const status = useBudgetStatus(month).data ?? []
+  const statusQuery = useBudgetStatus(month)
+  const status = statusQuery.data ?? []
   const report = useMonthlyReport(month).data
   // undefined = cerrado, null = nuevo, BudgetStatus = editar
   const [editing, setEditing] = useState<BudgetStatus | null | undefined>(undefined)
@@ -109,7 +111,10 @@ export default function Budgets() {
       </button>
 
       <section className="space-y-3">
-        {status.length === 0 && <p className="text-sm text-slate-500">Sin presupuestos para este mes.</p>}
+        {statusQuery.isLoading && <Loading />}
+        {!statusQuery.isLoading && status.length === 0 && (
+          <p className="text-sm text-slate-500">Sin presupuestos para este mes. Toca «Nuevo presupuesto» para ponerle un tope a una categoría (por ejemplo, Comida) y recibir avisos al acercarte.</p>
+        )}
         {status.map((b) => (
           <button key={b.budget_id} className="block w-full rounded-xl bg-surface p-3 text-left shadow-sm" onClick={() => setEditing(b)}>
             <div className="flex justify-between">

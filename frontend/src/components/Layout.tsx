@@ -9,6 +9,7 @@ import { setSession } from '../lib/localCache'
 import { EditorContext } from './editor'
 import PendingBanner from './PendingBanner'
 import Ready from './Ready'
+import VerifyBanner from './VerifyBanner'
 import QuickAdd from './QuickAdd'
 
 const links = [
@@ -28,8 +29,9 @@ const TITLES: Record<string, string> = {
   '/cuentas': 'Cuentas',
   '/categorias': 'Categorías',
   '/importar': 'Importar extracto',
+  '/cuenta': 'Cuenta',
 }
-const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar'])
+const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar', '/cuenta'])
 
 export default function Layout() {
   const { pathname } = useLocation()
@@ -94,6 +96,7 @@ export default function Layout() {
           </div>
         </header>
         <main className="mx-auto max-w-2xl space-y-4 p-4">
+          <VerifyBanner />
           <PendingBanner />
           <Outlet />
         </main>

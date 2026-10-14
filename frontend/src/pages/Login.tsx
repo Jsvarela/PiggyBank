@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 import { z } from 'zod'
 import { api } from '../api/client'
 
@@ -47,6 +48,14 @@ export default function Login() {
       <button type="button" className="w-full text-sm text-slate-600" onClick={() => setCreating(!creating)}>
         {creating ? 'Ya tengo usuario' : 'Primera vez: crear usuario'}
       </button>
+      {!creating && (
+        <Link to="/olvide" className="block text-center text-sm text-slate-600 underline">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      )}
+      <p className="pt-4 text-center text-xs text-slate-500">
+        Al continuar aceptas los <Link to="/terminos" className="underline">términos</Link> y la <Link to="/privacidad" className="underline">política de privacidad</Link>.
+      </p>
     </form>
   )
 }

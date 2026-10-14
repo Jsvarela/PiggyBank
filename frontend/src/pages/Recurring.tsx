@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { api } from '../api/client'
 import { useAccounts, useApiMutation, useCategories, useRecurring } from '../api/hooks'
 import { FREQUENCIES, TX_TYPES, type Frequency, type RecurringBody, type RecurringRule, type TxType } from '../api/types'
+import Loading from '../components/Loading'
 import Ready from '../components/Ready'
 import UpcomingList from '../components/UpcomingList'
 import { todayBogota } from '../lib/dates'
@@ -169,7 +170,8 @@ function RuleForm({ rule, onDone }: { rule?: RecurringRule; onDone: () => void }
 }
 
 export default function Recurring() {
-  const { data: rules = [] } = useRecurring()
+  const rulesQuery = useRecurring()
+  const rules = rulesQuery.data ?? []
   const accounts = useAccounts()
   const categories = useCategories()
   // undefined = cerrado, null = nueva, RecurringRule = editar
@@ -194,7 +196,10 @@ export default function Recurring() {
 
       <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Reglas</h2>
-        {rules.length === 0 && <p className="text-sm text-slate-500">Aún no tienes reglas (arriendo, Netflix, salario…).</p>}
+        {rulesQuery.isLoading && <Loading />}
+        {!rulesQuery.isLoading && rules.length === 0 && (
+          <p className="text-sm text-slate-500">Aún no tienes reglas. Agrega lo que se repite (arriendo, Netflix, salario…) y la app lo registra sola cada vez.</p>
+        )}
         <ul className="divide-y">
           {rules.map((r) => (
             <li key={r.id}>

@@ -18,6 +18,7 @@ export const TX_TYPES: Record<TxType, string> = {
 export interface User {
   id: number
   email: string
+  email_verified: boolean
 }
 
 export interface AccountBody {

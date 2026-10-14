@@ -49,6 +49,12 @@ def test_produccion_exige_secret_key_propio():
     assert Settings(_env_file=None, cookie_secure=False).secret_key == DEFAULT_SECRET  # desarrollo
 
 
+def test_enlaces_de_correo_usan_la_url_de_render_y_se_puede_sobrescribir(monkeypatch):
+    monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://finanzas.onrender.com")
+    assert Settings(_env_file=None).app_url == "https://finanzas.onrender.com"
+    assert Settings(_env_file=None, app_url="https://mi-dominio.co").app_url == "https://mi-dominio.co"
+
+
 def test_url_postgres_de_render_se_normaliza():
     s = Settings(_env_file=None, database_url="postgres://u:p@host/db")
     assert s.database_url == "postgresql://u:p@host/db"

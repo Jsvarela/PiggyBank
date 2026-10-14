@@ -11,8 +11,8 @@ COOKIE = "session"
 def get_current_user(
     session: str | None = Cookie(default=None), db: Session = Depends(get_db)
 ) -> User:
-    user_id = decode_token(session) if session else None
-    user = db.get(User, user_id) if user_id else None
-    if user is None:
+    decoded = decode_token(session) if session else None
+    user = db.get(User, decoded[0]) if decoded else None
+    if user is None or user.token_version != decoded[1]:
         raise HTTPException(status_code=401, detail="No autenticado")
     return user
