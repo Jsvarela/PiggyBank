@@ -19,6 +19,15 @@ npm install
 npm run dev
 ```
 
+## Probar la interfaz con datos extremos (solo desarrollo)
+Textos larguísimos, montos de 12 cifras, cuentas con emoji, listas vacías o de 1.500 filas. Usa una base desechable:
+```bash
+cd backend
+DATABASE_URL=sqlite:///./worst.db uv run python -m app.seed_worst worst   # o: empty | one | huge
+DATABASE_URL=sqlite:///./worst.db uv run uvicorn app.main:app --port 8000
+```
+Entra con `worst@localhost.test` (la contraseña está en `app/seed_worst.py`). Revisa cada pantalla a 320 px y con la letra al 200 %.
+
 ## Despliegue
 Ver [DEPLOY.md](DEPLOY.md): Render + Neon, gratis, un solo servicio.
 
