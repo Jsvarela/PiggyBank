@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Transaction } from '../api/types'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,7 +19,21 @@ const links = [
   ['/mas', 'Más'],
 ] as const
 
+const TITLES: Record<string, string> = {
+  '/movimientos': 'Movimientos',
+  '/presupuestos': 'Presupuestos',
+  '/metas': 'Metas',
+  '/mas': 'Más',
+  '/recurrentes': 'Recurrentes',
+  '/cuentas': 'Cuentas',
+  '/categorias': 'Categorías',
+  '/importar': 'Importar extracto',
+}
+const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar'])
+
 export default function Layout() {
+  const { pathname } = useLocation()
+  const isSub = SUBPAGES.has(pathname)
   // undefined = cerrado, null = nuevo movimiento, Transaction = editar
   const [editing, setEditing] = useState<Transaction | null | undefined>(undefined)
   const qc = useQueryClient()
@@ -56,43 +70,62 @@ export default function Layout() {
   return (
     <EditorContext.Provider value={(tx) => setEditing(tx ?? null)}>
       <div className="min-h-screen bg-slate-50 pb-32 text-slate-900">
-        <header className="flex items-center justify-between bg-surface px-4 py-3 shadow-sm">
-          <span className="font-semibold">Finanzas</span>
-          <button
-            className="text-sm text-slate-600"
-            onClick={async () => {
-              await api('/auth/logout', { method: 'POST' })
-              setSession(false)
-              qc.clear()
-              location.reload()
-            }}
-          >
-            Salir
-          </button>
+        <header className="bg-surface shadow-sm">
+          <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+            <span className="flex items-baseline gap-2">
+              {isSub && (
+                <Link to="/mas" className="text-sm text-slate-600" aria-label="Volver a Más">
+                  ‹ Más
+                </Link>
+              )}
+              <h1 className="font-semibold">{TITLES[pathname] ?? 'Finanzas'}</h1>
+            </span>
+            <button
+              className="text-sm text-slate-600"
+              onClick={async () => {
+                await api('/auth/logout', { method: 'POST' })
+                setSession(false)
+                qc.clear()
+                location.reload()
+              }}
+            >
+              Salir
+            </button>
+          </div>
         </header>
         <main className="mx-auto max-w-2xl space-y-4 p-4">
           <PendingBanner />
           <Outlet />
         </main>
 
-        <button
-          aria-label="Nuevo movimiento"
-          className="fixed bottom-20 right-4 z-10 h-14 w-14 rounded-full bg-emerald-600 text-3xl text-white shadow-lg"
-          onClick={() => setEditing(null)}
-        >
-          +
-        </button>
-        <nav className="fixed inset-x-0 bottom-0 flex border-t bg-surface">
-          {links.map(([to, label]) => (
-            <NavLink
-              key={to}
-              to={to}
-              end
-              className={({ isActive }) => `flex-1 py-3 text-center text-xs ${isActive ? 'font-semibold text-emerald-700' : 'text-slate-600'}`}
+        {/* el botón "+" se alinea con el contenido, no con el borde de la pantalla */}
+        <div className="pointer-events-none fixed inset-x-0 bottom-20 z-10">
+          <div className="mx-auto flex max-w-2xl justify-end px-4">
+            <button
+              aria-label="Nuevo movimiento"
+              className="pointer-events-auto h-14 w-14 rounded-full bg-brand text-3xl text-white shadow-lg"
+              onClick={() => setEditing(null)}
             >
-              {label}
-            </NavLink>
-          ))}
+              +
+            </button>
+          </div>
+        </div>
+        <nav className="fixed inset-x-0 bottom-0 border-t bg-surface">
+          <div className="mx-auto flex max-w-2xl">
+            {links.map(([to, label]) => (
+              <NavLink
+                key={to}
+                to={to}
+                end
+                className={({ isActive }) => {
+                  const active = isActive || (to === '/mas' && isSub) // las subpantallas pertenecen a "Más"
+                  return `flex-1 py-3 text-center text-xs ${active ? 'font-semibold text-emerald-700' : 'text-slate-600'}`
+                }}
+              >
+                {label}
+              </NavLink>
+            ))}
+          </div>
         </nav>
         {editing !== undefined && (
           <Ready of={[accounts, categories]}>

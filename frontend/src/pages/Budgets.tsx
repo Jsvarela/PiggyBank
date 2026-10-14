@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { formatMonth } from '../lib/format'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -64,7 +65,7 @@ function BudgetForm({ month, item, onDone }: { month: string; item?: BudgetStatu
         <input type="number" inputMode="numeric" className="mt-1 w-full rounded-lg border border-slate-300 p-2" {...register('alert_threshold', { valueAsNumber: true })} />
       </label>
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" {...register('repeat')} /> Repetir cada mes (si no, solo {month})
+        <input type="checkbox" {...register('repeat')} /> Repetir cada mes (si no, solo {formatMonth(month)})
       </label>
       {(save.error || del.error) && <p className="text-sm text-red-600">{(save.error ?? del.error)?.message}</p>}
       <div className="flex gap-2">
@@ -76,7 +77,7 @@ function BudgetForm({ month, item, onDone }: { month: string; item?: BudgetStatu
             Quitar
           </button>
         )}
-        <button className="flex-1 rounded-lg bg-emerald-600 py-2 text-white">Guardar</button>
+        <button className="flex-1 rounded-lg bg-brand py-2 text-white">Guardar</button>
       </div>
     </form>
   )
@@ -97,13 +98,13 @@ export default function Budgets() {
         <button className="rounded-lg border px-3 py-1" aria-label="Mes anterior" onClick={() => setMonth(shiftMonth(month, -1))}>
           ‹
         </button>
-        <span className="font-medium">{month}</span>
+        <span className="font-medium">{formatMonth(month)}</span>
         <button className="rounded-lg border px-3 py-1" aria-label="Mes siguiente" onClick={() => setMonth(shiftMonth(month, 1))}>
           ›
         </button>
       </div>
 
-      <button className="w-full rounded-lg bg-emerald-600 py-2 text-white" onClick={() => setEditing(null)}>
+      <button className="w-full rounded-lg bg-brand py-2 text-white" onClick={() => setEditing(null)}>
         Nuevo presupuesto
       </button>
 

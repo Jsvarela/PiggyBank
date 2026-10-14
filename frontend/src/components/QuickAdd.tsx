@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { api } from '../api/client'
 import { useAccounts, useApiMutation, useCategories } from '../api/hooks'
 import { TX_TYPES, type Transaction, type TransactionBody, type TxType } from '../api/types'
 import { todayBogota } from '../lib/dates'
+import { formatCOP } from '../lib/money'
 import { createTransaction } from '../lib/offlineQueue'
 
 const LAST_ACCOUNT = 'lastAccountId'
@@ -41,7 +43,7 @@ function lastAccount(): number | undefined {
 }
 
 const chip = (on: boolean) =>
-  `rounded-full border px-3 py-1.5 text-sm ${on ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-surface'}`
+  `rounded-full border px-3 py-1.5 text-sm ${on ? 'border-brand bg-brand text-white' : 'border-slate-300 bg-surface'}`
 
 export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: () => void }) {
   const accounts = (useAccounts().data ?? []).filter((a) => !a.archived)
@@ -70,6 +72,7 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
     },
   })
   const type = watch('type')
+  const amount = watch('amount')
   const accountId = watch('account_id')
   const toId = watch('to_account_id')
   const categoryId = watch('category_id')
@@ -78,6 +81,12 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
   const pick = (name: 'account_id' | 'to_account_id' | 'category_id', v: number) =>
     setValue(name, v, { shouldValidate: formState.isSubmitted })
   const kindCategories = categories.filter((c) => !c.archived && c.kind === type)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   const onSubmit = handleSubmit((v) => {
     const body: TransactionBody = {
@@ -101,10 +110,20 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
   return (
     <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center" onClick={onClose}>
       <form
+        role="dialog"
+        aria-modal="true"
+        aria-label={tx ? 'Editar movimiento' : 'Nuevo movimiento'}
         onSubmit={onSubmit}
         onClick={(e) => e.stopPropagation()}
         className="max-h-[92vh] w-full space-y-4 overflow-y-auto rounded-t-2xl bg-surface p-4 sm:max-w-md sm:rounded-2xl"
       >
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">{tx ? 'Editar movimiento' : 'Nuevo movimiento'}</h2>
+          <button type="button" aria-label="Cerrar" className="px-2 text-xl leading-none text-slate-600" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
         <div className="flex gap-2">
           {(Object.keys(TX_TYPES) as TxType[]).map((t) => (
             <button
@@ -130,7 +149,11 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
             className="w-full rounded-lg border border-slate-300 p-3 text-2xl"
             {...register('amount', { valueAsNumber: true })}
           />
-          {errors.amount && <p className="text-sm text-red-600">{errors.amount.message}</p>}
+          {errors.amount ? (
+            <p className="text-sm text-red-600">{errors.amount.message}</p>
+          ) : (
+            Number.isFinite(amount) && amount > 0 && <p className="text-sm text-slate-600">{formatCOP(amount)}</p> // 45000 -> $ 45.000
+          )}
         </div>
 
         {type !== 'transfer' && (
@@ -190,7 +213,7 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
               Borrar
             </button>
           )}
-          <button type="submit" disabled={save.isPending} className="flex-1 rounded-lg bg-emerald-600 py-3 font-medium text-white disabled:opacity-60">
+          <button type="submit" disabled={save.isPending} className="flex-1 rounded-lg bg-brand py-3 font-medium text-white disabled:opacity-60">
             {save.isPending ? 'Guardando…' : 'Guardar'}
           </button>
         </div>

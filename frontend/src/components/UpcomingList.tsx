@@ -1,4 +1,5 @@
 import { useAccounts, useCategories, useUpcoming } from '../api/hooks'
+import { formatDate } from '../lib/format'
 import { formatCOP } from '../lib/money'
 
 /** Próximos pagos de las reglas recurrentes (los siguientes 30 días). */
@@ -18,7 +19,7 @@ export default function UpcomingList({ limit }: { limit?: number }) {
               {p.description || categories.find((c) => c.id === p.category_id)?.name || 'Transferencia'}
             </span>
             <span className="block text-xs text-slate-500">
-              {p.date} · {accounts.find((a) => a.id === p.account_id)?.name}
+              {formatDate(p.date)} · {accounts.find((a) => a.id === p.account_id)?.name}
             </span>
           </span>
           <span className={p.type === 'income' ? 'text-emerald-700' : p.type === 'expense' ? 'text-red-700' : 'text-slate-600'}>

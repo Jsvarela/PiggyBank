@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { formatDate } from '../lib/format'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -159,7 +160,7 @@ function RuleForm({ rule, onDone }: { rule?: RecurringRule; onDone: () => void }
             Borrar
           </button>
         )}
-        <button disabled={save.isPending} className="flex-1 rounded-lg bg-emerald-600 py-2 text-white disabled:opacity-60">
+        <button disabled={save.isPending} className="flex-1 rounded-lg bg-brand py-2 text-white disabled:opacity-60">
           Guardar
         </button>
       </div>
@@ -182,7 +183,7 @@ export default function Recurring() {
     )
   return (
     <div className="space-y-4">
-      <button className="w-full rounded-lg bg-emerald-600 py-2 text-white" onClick={() => setEditing(null)}>
+      <button className="w-full rounded-lg bg-brand py-2 text-white" onClick={() => setEditing(null)}>
         Nueva regla recurrente
       </button>
 
@@ -201,7 +202,7 @@ export default function Recurring() {
                 <span>
                   <span className="block">{r.description || TX_TYPES[r.type]}</span>
                   <span className="block text-xs text-slate-500">
-                    {FREQUENCIES[r.frequency]} · próxima {r.next_run_date}
+                    {FREQUENCIES[r.frequency]} · próxima {formatDate(r.next_run_date)}
                     {!r.active && ' · pausada'}
                   </span>
                 </span>

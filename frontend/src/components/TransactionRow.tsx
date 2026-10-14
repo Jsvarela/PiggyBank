@@ -1,4 +1,5 @@
 import { useAccounts, useCategories } from '../api/hooks'
+import { formatDate } from '../lib/format'
 import type { Transaction } from '../api/types'
 import { formatCOP } from '../lib/money'
 import { useEditor } from './editor'
@@ -20,7 +21,7 @@ export default function TransactionRow({ tx }: { tx: Transaction }) {
         <span>
           <span className="block">{title}</span>
           <span className="block text-xs text-slate-500">
-            {tx.date} · {sub}
+            {formatDate(tx.date)} · {sub}
           </span>
         </span>
         <span className={color}>

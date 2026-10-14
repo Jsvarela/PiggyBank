@@ -29,7 +29,7 @@ export default function InstallApp() {
         <p className="text-sm text-slate-600">Ya estás usando la app instalada.</p>
       ) : event ? (
         <button
-          className="w-full rounded-lg bg-emerald-600 py-2 text-white"
+          className="w-full rounded-lg bg-brand py-2 text-white"
           onClick={() => {
             event.prompt()
             setEvent(null)

@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { formatDate } from '../lib/format'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
@@ -176,7 +177,7 @@ export default function ImportCsv() {
               </select>
             </label>
           </div>
-          <button disabled={busy} className="w-full rounded-lg bg-emerald-600 py-2 text-white disabled:opacity-60" onClick={showPreview}>
+          <button disabled={busy} className="w-full rounded-lg bg-brand py-2 text-white disabled:opacity-60" onClick={showPreview}>
             Ver vista previa
           </button>
         </section>
@@ -199,13 +200,13 @@ export default function ImportCsv() {
                     <div className="min-w-0 flex-1">
                       <p className="flex justify-between gap-2">
                         <span className="truncate">{r.description || '(sin descripción)'}</span>
-                        <span className={r.type === 'income' ? 'text-emerald-700' : 'text-red-700'}>
+                        <span className={`whitespace-nowrap ${r.type === 'income' ? 'text-emerald-700' : 'text-red-700'}`}>
                           {r.type === 'income' ? '+' : '-'}
                           {formatCOP(r.amount ?? 0)}
                         </span>
                       </p>
                       <p className="text-xs text-slate-500">
-                        {r.date}
+                        {r.date && formatDate(r.date)}
                         {r.duplicate && <span className="ml-2 rounded bg-amber-50 px-1 text-amber-700">posible duplicado</span>}
                       </p>
                       <select aria-label={`Categoría fila ${r.line}`} className="mt-1 w-full rounded border border-slate-300 bg-surface p-1 text-xs" value={choice[r.line]?.category ?? ''} onChange={(e) => setChoice({ ...choice, [r.line]: { ...choice[r.line], category: Number(e.target.value) } })}>
@@ -221,7 +222,7 @@ export default function ImportCsv() {
               </li>
             ))}
           </ul>
-          <button disabled={busy || chosen.length === 0} className="w-full rounded-lg bg-emerald-600 py-2 text-white disabled:opacity-60" onClick={confirm}>
+          <button disabled={busy || chosen.length === 0} className="w-full rounded-lg bg-brand py-2 text-white disabled:opacity-60" onClick={confirm}>
             Importar {chosen.length} movimientos
           </button>
         </section>

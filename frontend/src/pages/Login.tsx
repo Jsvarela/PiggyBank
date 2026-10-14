@@ -43,7 +43,7 @@ export default function Login() {
       />
       {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <button className="w-full rounded-lg bg-emerald-600 py-3 font-medium text-white">{creating ? 'Crear y entrar' : 'Entrar'}</button>
+      <button className="w-full rounded-lg bg-brand py-3 font-medium text-white">{creating ? 'Crear y entrar' : 'Entrar'}</button>
       <button type="button" className="w-full text-sm text-slate-600" onClick={() => setCreating(!creating)}>
         {creating ? 'Ya tengo usuario' : 'Primera vez: crear usuario'}
       </button>

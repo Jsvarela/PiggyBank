@@ -20,8 +20,14 @@ export default function Transactions() {
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
-        <input type="date" aria-label="Desde" className={input} value={f.from ?? ''} onChange={(e) => set({ from: e.target.value || undefined })} />
-        <input type="date" aria-label="Hasta" className={input} value={f.to ?? ''} onChange={(e) => set({ to: e.target.value || undefined })} />
+        <label className="text-xs text-slate-600">
+          Desde
+          <input type="date" className={`mt-0.5 w-full ${input}`} value={f.from ?? ''} onChange={(e) => set({ from: e.target.value || undefined })} />
+        </label>
+        <label className="text-xs text-slate-600">
+          Hasta
+          <input type="date" className={`mt-0.5 w-full ${input}`} value={f.to ?? ''} onChange={(e) => set({ to: e.target.value || undefined })} />
+        </label>
         <select aria-label="Cuenta" className={input} value={f.account_id ?? ''} onChange={(e) => set({ account_id: num(e.target.value) })}>
           <option value="">Todas las cuentas</option>
           {accounts.map((a) => (

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { formatDate } from '../lib/format'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -61,7 +62,7 @@ function GoalForm({ goal, onDone }: { goal?: Goal; onDone: () => void }) {
             Borrar
           </button>
         )}
-        <button className="flex-1 rounded-lg bg-emerald-600 py-2 text-white">Guardar</button>
+        <button className="flex-1 rounded-lg bg-brand py-2 text-white">Guardar</button>
       </div>
     </form>
   )
@@ -98,7 +99,7 @@ function ContributeForm({ goal, onDone }: { goal: Goal; onDone: () => void }) {
         <button type="button" className="rounded-lg border px-4 py-2" onClick={onDone}>
           Cancelar
         </button>
-        <button className="flex-1 rounded-lg bg-emerald-600 py-2 text-white">Aportar</button>
+        <button className="flex-1 rounded-lg bg-brand py-2 text-white">Aportar</button>
       </div>
     </form>
   )
@@ -119,27 +120,30 @@ export default function Goals() {
     )
   return (
     <div className="space-y-3">
-      <button className="w-full rounded-lg bg-emerald-600 py-2 text-white" onClick={() => setEditing(null)}>
+      <button className="w-full rounded-lg bg-brand py-2 text-white" onClick={() => setEditing(null)}>
         Nueva meta
       </button>
       {goals.length === 0 && <p className="text-sm text-slate-500">Aún no tienes metas de ahorro.</p>}
       {goals.map((g) => (
         <section key={g.id} className="rounded-xl bg-surface p-4 shadow-sm">
           <div className="flex justify-between">
-            <button className="font-medium" onClick={() => setEditing(g)}>
-              {g.name}
-            </button>
+            <span className="flex items-baseline gap-2">
+              <span className="font-medium">{g.name}</span>
+              <button className="text-xs text-slate-600 underline" onClick={() => setEditing(g)}>
+                Editar
+              </button>
+            </span>
             <span className="text-sm text-slate-600">
               {formatCOP(g.saved)} / {formatCOP(g.target_amount)}
             </span>
           </div>
           <div className="my-2 h-2 rounded bg-slate-200">
-            <div className={`h-2 rounded ${g.reached ? 'bg-emerald-600' : 'bg-sky-500'}`} style={{ width: `${Math.min(g.percent, 100)}%` }} />
+            <div className={`h-2 rounded ${g.reached ? 'bg-brand' : 'bg-sky-500'}`} style={{ width: `${Math.min(g.percent, 100)}%` }} />
           </div>
           <p className="text-xs text-slate-500">
             {g.reached ? '¡Meta cumplida!' : `${g.percent}% · faltan ${formatCOP(g.remaining)}`}
             {!g.reached && g.monthly_suggested !== null && ` · sugerido ${formatCOP(g.monthly_suggested)} al mes`}
-            {g.deadline && ` · hasta ${g.deadline}`}
+            {g.deadline && ` · hasta ${formatDate(g.deadline)}`}
           </p>
           {contributing === g.id ? (
             <Ready of={[accounts]}>
@@ -148,7 +152,7 @@ export default function Goals() {
           ) : g.account_id === null ? (
             <p className="mt-2 text-xs text-amber-700">Asigna una cuenta de ahorro (editar la meta) para poder aportar.</p>
           ) : (
-            <button className="mt-2 rounded-lg border border-emerald-600 px-3 py-1 text-sm text-emerald-700" onClick={() => setContributing(g.id)}>
+            <button className="mt-2 rounded-lg border border-brand px-3 py-1 text-sm text-emerald-700" onClick={() => setContributing(g.id)}>
               Aportar
             </button>
           )}

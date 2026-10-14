@@ -4,6 +4,20 @@
    porque los botones verdes necesitan seguir con texto blanco en modo oscuro. */
 @theme {
   --color-surface: #ffffff;
+  /* verde de botones: con texto blanco da 5,5:1 de contraste (emerald-600 daba 3,8:1) */
+  --color-brand: #047857;
+}
+
+/* Tailwind v4 dibuja los bordes y divisores con el color del texto (negro/blanco):
+   se les da un gris suave que también cambia con el tema. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-slate-200);
+  }
 }
 
 /* Modo oscuro: las utilidades de Tailwind leen estas variables, así que basta con

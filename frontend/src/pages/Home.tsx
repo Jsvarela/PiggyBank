@@ -1,4 +1,5 @@
 import { useDashboard } from '../api/hooks'
+import { formatMonth } from '../lib/format'
 import BudgetAlerts from '../components/BudgetAlerts'
 import TransactionRow from '../components/TransactionRow'
 import UpcomingList from '../components/UpcomingList'
@@ -20,11 +21,11 @@ export default function Home() {
 
       <section className="grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-surface p-3 shadow-sm">
-          <p className="text-sm text-slate-500">Ingresos de {data.month}</p>
+          <p className="text-sm text-slate-500">Ingresos de {formatMonth(data.month)}</p>
           <p className="text-lg text-emerald-700">{formatCOP(data.income)}</p>
         </div>
         <div className="rounded-xl bg-surface p-3 shadow-sm">
-          <p className="text-sm text-slate-500">Gastos de {data.month}</p>
+          <p className="text-sm text-slate-500">Gastos de {formatMonth(data.month)}</p>
           <p className="text-lg text-red-700">{formatCOP(data.expense)}</p>
         </div>
       </section>
