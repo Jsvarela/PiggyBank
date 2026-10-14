@@ -209,7 +209,7 @@ export default function ImportCsv() {
                         {r.date && formatDate(r.date)}
                         {r.duplicate && <span className="ml-2 rounded bg-amber-50 px-1 text-amber-700">posible duplicado</span>}
                       </p>
-                      <select aria-label={`Categoría fila ${r.line}`} className="mt-1 w-full rounded border border-slate-300 bg-surface p-1 text-xs" value={choice[r.line]?.category ?? ''} onChange={(e) => setChoice({ ...choice, [r.line]: { ...choice[r.line], category: Number(e.target.value) } })}>
+                      <select aria-label={`Categoría fila ${r.line}`} className="mt-1 w-full rounded border border-slate-300 bg-surface p-1 text-base" value={choice[r.line]?.category ?? ''} onChange={(e) => setChoice({ ...choice, [r.line]: { ...choice[r.line], category: Number(e.target.value) } })}>
                         {categories.filter((c) => c.kind === r.type).map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.name}

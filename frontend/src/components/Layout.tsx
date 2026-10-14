@@ -71,8 +71,8 @@ export default function Layout() {
 
   return (
     <EditorContext.Provider value={(tx) => setEditing(tx ?? null)}>
-      <div className="min-h-screen bg-slate-50 pb-32 text-slate-900">
-        <header className="bg-surface shadow-sm">
+      <div className="min-h-dvh bg-slate-50 pb-32 text-slate-900">
+        <header className="bg-surface pt-[env(safe-area-inset-top)] shadow-sm">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
             <span className="flex items-baseline gap-2">
               {isSub && (
@@ -102,7 +102,7 @@ export default function Layout() {
         </main>
 
         {/* el botón "+" se alinea con el contenido, no con el borde de la pantalla */}
-        <div className="pointer-events-none fixed inset-x-0 bottom-20 z-10">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-10">
           <div className="mx-auto flex max-w-2xl justify-end px-4">
             <button
               aria-label="Nuevo movimiento"
@@ -113,7 +113,7 @@ export default function Layout() {
             </button>
           </div>
         </div>
-        <nav className="fixed inset-x-0 bottom-0 border-t bg-surface">
+        <nav className="fixed inset-x-0 bottom-0 border-t bg-surface pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto flex max-w-2xl">
             {links.map(([to, label]) => (
               <NavLink

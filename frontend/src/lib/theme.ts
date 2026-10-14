@@ -13,9 +13,13 @@ export function getMode(): ThemeMode {
   }
 }
 
+// Color de la cabecera (--color-surface en index.css): así la barra de estado del celular no desentona.
+export const themeColor = (dark: boolean) => (dark ? '#1e293b' : '#ffffff')
+
 export function applyTheme(mode = getMode()) {
   const dark = isDark(mode, matchMedia('(prefers-color-scheme: dark)').matches)
   document.documentElement.classList.toggle('dark', dark)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor(dark))
 }
 
 export function setMode(mode: ThemeMode) {

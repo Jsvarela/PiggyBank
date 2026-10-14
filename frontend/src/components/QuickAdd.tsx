@@ -115,7 +115,7 @@ export default function QuickAdd({ tx, onClose }: { tx?: Transaction; onClose: (
         aria-label={tx ? 'Editar movimiento' : 'Nuevo movimiento'}
         onSubmit={onSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[92vh] w-full space-y-4 overflow-y-auto rounded-t-2xl bg-surface p-4 sm:max-w-md sm:rounded-2xl"
+        className="max-h-[92dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-2xl bg-surface p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-w-md sm:rounded-2xl"
       >
         <div className="flex items-center justify-between">
           <h2 className="font-semibold">{tx ? 'Editar movimiento' : 'Nuevo movimiento'}</h2>

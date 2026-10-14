@@ -40,7 +40,39 @@
   --color-amber-800: #fcd34d;
 }
 
+html {
+  color-scheme: light; /* el tema oscuro lo cambia arriba (.dark) */
+  -webkit-tap-highlight-color: transparent; /* sin el destello gris/azul al tocar */
+  -webkit-text-size-adjust: 100%; /* sin texto inflado en horizontal */
+}
+
 body {
   background: var(--color-slate-50);
   color: var(--color-slate-900);
+}
+
+/* Se siente app, no página web: toque sin demora, el texto de un botón no se selecciona al
+   mantener presionado (el contenido sí sigue seleccionable), y respuesta inmediata al presionar. */
+@layer base {
+  a,
+  button {
+    touch-action: manipulation;
+  }
+  button {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    transition: transform 100ms ease-out;
+  }
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button {
+      transition: none;
+    }
+    button:not(:disabled):active {
+      transform: none;
+    }
+  }
 }

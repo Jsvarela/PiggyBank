@@ -17,7 +17,7 @@ export default defineConfig({
         start_url: '/',
         display: 'standalone',
         background_color: '#f8fafc',
-        theme_color: '#059669',
+        theme_color: '#ffffff', // el de la cabecera; el de oscuro lo pone theme.ts en la etiqueta meta
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },

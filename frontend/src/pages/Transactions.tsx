@@ -5,7 +5,8 @@ import Loading from '../components/Loading'
 import TransactionRow from '../components/TransactionRow'
 
 const PAGE = 20
-const input = 'rounded-lg border border-slate-300 bg-surface p-2 text-sm'
+// text-base (16px): en iPhone, un campo con letra menor hace zoom a toda la página al tocarlo
+const input = 'rounded-lg border border-slate-300 bg-surface p-2 text-base'
 
 export default function Transactions() {
   const [f, setF] = useState<TransactionFilters>({ limit: PAGE, offset: 0 })
