@@ -59,11 +59,19 @@ def test_enlaces_de_correo_usan_la_url_de_render_y_se_puede_sobrescribir(monkeyp
     "entrada",
     [
         "postgres://u:p@host/db",  # estilo antiguo (Heroku/Render)
-        "postgresql://u:p@host/db",  # ya correcta: no se toca
-        "postgresql+psycopg://u:p@host/db?sslmode=require",  # pide psycopg 3, que no está instalado
+        "postgresql://u:p@host/db",  # lo que da Neon: SQLAlchemy 2.1 lo mandaría a psycopg 3
+        "postgresql+psycopg://u:p@host/db",  # pide psycopg 3, que no está instalado
+        "postgresql+psycopg2://u:p@host/db",  # ya correcta
     ],
 )
 def test_url_postgres_se_normaliza_al_driver_instalado(entrada):
-    s = Settings(_env_file=None, database_url=entrada)
-    assert s.database_url.startswith("postgresql://u:p@host/db")
-    assert "+psycopg" not in s.database_url
+    s = Settings(_env_file=None, database_url=entrada + "?sslmode=require")
+    assert s.database_url == "postgresql+psycopg2://u:p@host/db?sslmode=require"
+
+
+def test_el_driver_elegido_realmente_se_puede_cargar():
+    # lo que falló en producción: crear el motor importa el driver; si no está instalado, truena aquí
+    from sqlalchemy import create_engine
+
+    url = Settings(_env_file=None, database_url="postgresql://u:p@host/db").database_url
+    assert create_engine(url).dialect.driver == "psycopg2"
