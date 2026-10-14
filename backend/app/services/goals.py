@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.errors import DomainError
 from app.models import Account, SavingsGoal, Transaction, TxType
 from app.schemas import GoalIn, GoalOut
+from app.services.balances import sum_pesos
 from app.services.catalog import get_or_404
 
 
@@ -25,7 +26,7 @@ def monthly_suggestion(goal: SavingsGoal, saved: int, today: date) -> int | None
 
 def goal_progress(db: Session, goal: SavingsGoal, today: date) -> GoalOut:
     saved = db.scalar(
-        select(func.coalesce(func.sum(Transaction.amount), 0)).where(Transaction.goal_id == goal.id)
+        select(func.coalesce(sum_pesos(Transaction.amount), 0)).where(Transaction.goal_id == goal.id)
     )
     return GoalOut(
         id=goal.id, name=goal.name, target_amount=goal.target_amount, deadline=goal.deadline,

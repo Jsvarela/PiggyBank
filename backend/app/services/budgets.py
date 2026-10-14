@@ -1,13 +1,13 @@
 from collections import defaultdict
 from datetime import date, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.errors import DomainError
 from app.models import Budget, Category, CategoryKind, Transaction, TxType
 from app.schemas import BudgetIn, BudgetStatus, CategorySpend, MonthlyReport
-from app.services.balances import month_totals
+from app.services.balances import month_totals, sum_pesos
 from app.services.catalog import get_or_404
 from app.timeutil import month_range
 
@@ -40,7 +40,7 @@ def save_budget(db: Session, data: BudgetIn) -> Budget:
 
 def _direct_spend(db: Session, start: date, end: date) -> dict[int, int]:
     q = (
-        select(Transaction.category_id, func.sum(Transaction.amount))
+        select(Transaction.category_id, sum_pesos(Transaction.amount))
         .where(Transaction.type == TxType.expense, Transaction.date >= start, Transaction.date < end)
         .group_by(Transaction.category_id)
     )

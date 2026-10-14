@@ -1,9 +1,12 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.config import Settings
 from app.db import Base, get_db
 from app.main import app
 from app.ratelimit import limiter
@@ -11,9 +14,19 @@ from app.ratelimit import limiter
 
 @pytest.fixture
 def engine():
-    eng = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
+    """SQLite en memoria por defecto. Con TEST_DATABASE_URL (la CI) corre contra Postgres, como producción."""
+    url = os.environ.get("TEST_DATABASE_URL")
+    if url:
+        # misma normalización de driver que usa la app: si falla en producción, falla aquí
+        eng = create_engine(Settings(_env_file=None, database_url=url).database_url)
+        Base.metadata.drop_all(eng)  # por si una corrida anterior quedó a medias
+    else:
+        eng = create_engine("sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False})
     Base.metadata.create_all(eng)
-    return eng
+    yield eng
+    if url:
+        eng.dispose()  # suelta las conexiones; las tablas se recrean limpias en la siguiente prueba
+        Base.metadata.drop_all(create_engine(Settings(_env_file=None, database_url=url).database_url))
 
 
 @pytest.fixture
