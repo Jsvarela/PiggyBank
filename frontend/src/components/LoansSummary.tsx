@@ -30,10 +30,8 @@ export default function LoansSummary({ limit = 3 }: { limit?: number }) {
         {pending.slice(0, limit).map((l) => (
           <li key={l.id} className="flex items-start justify-between gap-3 py-2">
             <span className="min-w-0">
-              <span className="block [overflow-wrap:anywhere]">
-                {l.person}
-                <span className="text-xs text-slate-500"> · {l.direction === 'lent' ? 'te debe' : 'le debes'}</span>
-              </span>
+              <span className="line-clamp-2 [overflow-wrap:anywhere]">{l.person}</span>
+              <span className="block whitespace-nowrap text-xs text-slate-500">{l.direction === 'lent' ? 'te debe' : 'le debes'}</span>
               <span className={`block text-xs ${l.due_date && l.due_date < today ? 'text-red-700' : 'text-slate-500'}`}>
                 {l.due_date ? `${l.due_date < today ? 'Vencido · ' : ''}${formatDate(l.due_date)}` : 'Sin fecha'}
               </span>

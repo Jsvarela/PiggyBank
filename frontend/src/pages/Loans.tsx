@@ -44,13 +44,13 @@ const TEXT = {
 const money = z.number({ error: 'Ingresa un monto' }).int().positive('Debe ser mayor que 0').max(MAX_MONEY, MONEY_TOO_BIG)
 const schema = z
   .object({
-    person: z.string().trim().min(1, 'Escribe el nombre de la persona'),
+    person: z.string().trim().min(1, 'Escribe el nombre de la persona').max(100, 'Máximo 100 caracteres'),
     amount: money,
     expected_amount: money,
     // vacío = 0; el campo numérico vacío llega como NaN
     received: z.number().int().min(0, 'No puede ser negativo').max(MAX_MONEY, MONEY_TOO_BIG).or(z.nan()),
     due_date: z.string(),
-    note: z.string(),
+    note: z.string().max(255, 'Máximo 255 caracteres'),
   })
   .refine((v) => Number.isNaN(v.received) || v.received <= v.expected_amount, { path: ['received'], message: 'No puede ser más que el total' })
 type Values = z.infer<typeof schema>
@@ -92,7 +92,7 @@ function LoanForm({ loan, direction, onDone }: { loan?: Loan; direction: Directi
           valueAsNumber: true,
           // lo más común es devolver lo mismo que se prestó: se copia mientras no hayas tocado el otro campo
           onChange: (e) => {
-            if (!formState.dirtyFields.expected_amount) setValue('expected_amount', e.target.valueAsNumber)
+            if (!loan && !formState.dirtyFields.expected_amount) setValue('expected_amount', e.target.valueAsNumber)
           },
         })}
       />
@@ -106,6 +106,7 @@ function LoanForm({ loan, direction, onDone }: { loan?: Loan; direction: Directi
         <input type="date" className={field} {...register('due_date')} />
       </label>
       <input placeholder="Nota (opcional)" className={field} {...register('note')} />
+      {errors.note && <p className="text-sm text-red-600">{errors.note.message}</p>}
       {(save.error || del.error) && <p className="text-sm text-red-600">{(save.error ?? del.error)?.message}</p>}
       <div className="flex gap-2">
         <button type="button" className="rounded-lg border px-4 py-2" onClick={onDone}>
@@ -204,7 +205,7 @@ export default function Loans() {
         const late = !l.paid && l.due_date !== null && l.due_date < today
         const left = l.expected_amount - l.received
         return (
-          <section key={l.id} className={`rounded-xl bg-surface p-4 shadow-sm ${l.paid ? 'opacity-60' : ''}`}>
+          <section key={l.id} className={`rounded-xl bg-surface p-4 ${l.paid ? 'border border-dashed border-slate-300' : 'shadow-sm'}`}>
             <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
               <span className="flex min-w-0 grow basis-40 items-baseline gap-2">
                 <span className="min-w-0 font-medium [overflow-wrap:anywhere]">{l.person}</span>
@@ -224,8 +225,8 @@ export default function Loans() {
               {l.expected_amount !== l.amount && ` · total ${formatCOP(l.expected_amount)}`}
               {l.received > 0 && ` · ${t.done.toLowerCase()} ${formatCOP(l.received)}`}
               {l.due_date && ` · ${formatDate(l.due_date)}`}
-              {l.note && ` · ${l.note}`}
             </p>
+            {l.note && <p className="line-clamp-2 text-xs text-slate-500 [overflow-wrap:anywhere]">{l.note}</p>}
             {late && <p className="text-xs text-red-700">Vencido</p>}
             {!l.paid &&
               (paying === l.id ? (

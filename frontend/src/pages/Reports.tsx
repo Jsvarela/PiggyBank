@@ -11,6 +11,9 @@ const INCOME = 'bg-sky-500'
 const EXPENSE = 'bg-orange-500'
 const TOP = 6 // el resto de categorías se junta en «Otras»
 
+// menos del 1 % no es «0 %»: ese gasto sí existe
+const pct = (n: number, total: number) => (n * 100 < total ? '<1%' : `${Math.round((n * 100) / total)}%`)
+
 const shortMonth = (ym: string) => formatMonth(ym).split(' ')[0].slice(0, 3)
 
 function CategoryBars({ month }: { month: string }) {
@@ -31,7 +34,7 @@ function CategoryBars({ month }: { month: string }) {
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
             <span className="min-w-0 grow basis-32 [overflow-wrap:anywhere]">{b.name}</span>
             <span className="whitespace-nowrap text-slate-600">
-              {formatCOP(b.amount)} · {Math.round((b.amount * 100) / total)}%
+              {formatCOP(b.amount)} · {pct(b.amount, total)}
             </span>
           </div>
           <div className="mt-1 h-3 rounded bg-slate-200" aria-hidden>
@@ -47,7 +50,8 @@ function Trend({ month }: { month: string }) {
   const points = useTrend(month, 6).data
   if (!points) return <Loading />
   const max = Math.max(...points.flatMap((p) => [p.income, p.expense]), 1)
-  const h = (n: number) => `${(n * 100) / max}%`
+  // un monto chico junto a uno enorme sigue visible: mínimo 2 px (y nada si es cero)
+  const h = (n: number) => (n > 0 ? `max(${(n * 100) / max}%, 2px)` : '0')
 
   return (
     <div className="space-y-3">
@@ -62,7 +66,7 @@ function Trend({ month }: { month: string }) {
       <div className="flex h-40 items-end gap-2" role="img" aria-label="Ingresos y gastos de los últimos 6 meses">
         {points.map((p) => (
           <div key={p.month} className="flex h-full min-w-0 flex-1 flex-col justify-end">
-            <div className="flex h-full items-end justify-center gap-0.5">
+            <div className="flex h-full items-end justify-center gap-0.5 border-b border-slate-300">
               <div className={`w-1/2 max-w-5 rounded-t ${INCOME}`} style={{ height: h(p.income) }} title={`Ingresos ${formatCOP(p.income)}`} />
               <div className={`w-1/2 max-w-5 rounded-t ${EXPENSE}`} style={{ height: h(p.expense) }} title={`Gastos ${formatCOP(p.expense)}`} />
             </div>

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models import User
 from app.security import decode_token
+from app.tenancy import bind_user
 
 COOKIE = "session"
 
@@ -17,7 +18,7 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="No autenticado")
     # Desde aquí, TODA consulta de esta petición queda limitada a los datos de este usuario (app/tenancy.py).
     # `db` es la misma sesión que recibe la ruta: FastAPI comparte la dependencia get_db dentro de una petición.
-    db.info["user_id"] = user.id
+    bind_user(db, user.id)
     return user
 
 

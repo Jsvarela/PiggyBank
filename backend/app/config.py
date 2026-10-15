@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "sqlite:///./finanzas.db"
+    # Solo para Alembic (crear/alterar tablas). Con RLS, DATABASE_URL debe ser un rol SIN BYPASSRLS y las
+    # migraciones corren con el dueño. Vacía = Alembic usa DATABASE_URL.
+    migration_database_url: str = ""
     secret_key: str = DEFAULT_SECRET
     frontend_origin: str = "http://localhost:5173"
     cookie_secure: bool = False  # True en producción (HTTPS)
@@ -32,7 +35,7 @@ class Settings(BaseSettings):
     def email_enabled(self) -> bool:
         return bool(self.smtp_host)
 
-    @field_validator("database_url")
+    @field_validator("database_url", "migration_database_url")
     @classmethod
     def _driver(cls, v: str) -> str:
         # Cualquier URL de Postgres se lleva al driver que sí instalamos (psycopg2). Hace falta nombrarlo:

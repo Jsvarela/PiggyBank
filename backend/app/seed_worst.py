@@ -20,6 +20,7 @@ from app.models import (
     Category,
     CategoryKind,
     Frequency,
+    Loan,
     RecurringRule,
     SavingsGoal,
     Transaction,
@@ -28,6 +29,7 @@ from app.models import (
 )
 from app.security import hash_password
 from app.seed import seed_categories
+from app.tenancy import bind_user
 from app.timeutil import today_bogota
 
 EMAIL, PASSWORD = "worst@localhost.test", "worst-case-local-123"
@@ -43,6 +45,8 @@ LONG_TEXT = ("Pago de la cuota extraordinaria de administración del conjunto re
              "semestre anterior, más intereses de mora, retroactivo de servicios comunes y ajuste por la "
              "reliquidación del año pasado según acta de asamblea extraordinaria número 14.")[:255]
 # sin espacios: no hay dónde partirlo
+LONG_PERSON = "María Fernanda de los Ángeles Rodríguez-Hernández de la Vega y Montoya (prima de Cali)"  # 90
+EMAIL_PERSON = "juan.pablo.rodriguez.montoya.gutierrez@correo-empresarial-internacional.com.co"
 UNBREAKABLE = "PSE-REF-9f8e7d6c5b4a4c3d8e2f1a0b9c8d7e6f-AUTORIZACION-BANCOLOMBIA-0001234567890123456789"
 
 
@@ -127,6 +131,30 @@ def build_worst(db) -> None:
                              start_date=today, next_run_date=today, active=active))
 
 
+def build_loans_worst(db) -> None:
+    today = today_bogota()
+    day = lambda n: today + timedelta(days=n)
+    big = 50_000_000_000
+    # (persona, prestado, total, recibido, fecha, nota, dirección)
+    rows = [
+        (LONG_PERSON, 1_234_567_890, 1_345_000_000, 400_000_000, day(-400), LONG_TEXT, "lent"),  # nombre largo, vencido hace más de un año
+        (EMAIL_PERSON, big, big, big - 1, day(3), UNBREAKABLE, "lent"),  # monto enorme, falta 1 peso, nota sin espacios
+        ("J", 1, 1, 0, None, None, "lent"),  # una letra, un peso, sin fecha
+        ("Tío Beto 🧑‍🔧", 100_000, 90_000, 0, day(0), None, "lent"),  # emoji, le cobras menos de lo prestado, vence hoy
+        ("Camila", big, big, 1, day(30), "Casi nada abonado", "lent"),  # 1 peso de 50 mil millones: barra al 0 %
+        ("Pagado hace rato", 200_000, 200_000, 200_000, day(-60), None, "lent"),  # ya pagado
+        ("Ana", 80_000, 80_000, 0, day(10), None, "lent"),
+        ("Pedro", 80_000, 80_000, 0, day(11), None, "lent"),  # más de 3 pendientes: Inicio tiene que cortar la lista
+        (LONG_PERSON, 5_000_000, 5_500_000, 0, day(-5), "Arriendo del local", "borrowed"),
+        (EMAIL_PERSON, big, big, 0, None, None, "borrowed"),
+        ("Mamá", 300_000, 300_000, 150_000, day(20), None, "borrowed"),
+        ("Deuda saldada", 50_000, 50_000, 50_000, None, None, "borrowed"),
+    ]
+    for person, amount, expected, received, due, note, direction in rows:
+        db.add(Loan(person=person, amount=amount, expected_amount=expected, received=received, due_date=due, note=note,
+                    direction=direction, paid=received >= expected))
+
+
 def build_one(db) -> None:
     today = today_bogota()
     a = Account(name="Efectivo", type=AccountType.cash, initial_balance=100_000)
@@ -137,6 +165,7 @@ def build_one(db) -> None:
                        description="Almuerzo"))
     db.add(Budget(category_id=comida.id, month=None, is_default=True, limit_amount=100_000))
     db.add(SavingsGoal(name="Viaje", target_amount=1_000_000, account_id=a.id))
+    db.add(Loan(person="Camila", amount=100_000, expected_amount=100_000, direction="lent"))
     db.add(RecurringRule(type=TxType.expense, amount=29_900, account_id=a.id, category_id=comida.id,
                          description="Netflix", frequency=Frequency.monthly, start_date=today, next_run_date=today))
 
@@ -155,9 +184,17 @@ def build_huge(db, n: int = 1500) -> None:
         db.add(Transaction(type=TxType.expense, amount=rng.randint(1_000, 400_000), date=today - timedelta(days=rng.randint(0, 730)),
                            account_id=rng.choice(accounts).id, category_id=rng.choice(cats).id,
                            description=f"Movimiento {i + 1}"))
+    for i in range(200):  # una lista de préstamos sin paginar
+        db.add(Loan(person=f"Persona {i + 1}", amount=50_000, expected_amount=55_000, received=rng.choice([0, 0, 20_000]),
+                    direction=rng.choice(["lent", "borrowed"]), due_date=today + timedelta(days=rng.randint(-30, 90))))
 
 
-BUILDERS = {"worst": build_worst, "empty": lambda db: None, "one": build_one, "huge": build_huge}
+def build_worst_all(db) -> None:
+    build_worst(db)
+    build_loans_worst(db)
+
+
+BUILDERS = {"worst": build_worst_all, "empty": lambda db: None, "one": build_one, "huge": build_huge}
 
 
 def main(state: str) -> None:
@@ -167,7 +204,7 @@ def main(state: str) -> None:
         user = User(email=EMAIL, password_hash=hash_password(PASSWORD), is_admin=True)
         db.add(user)
         db.commit()
-        db.info["user_id"] = user.id  # todo lo que sigue es de este usuario
+        bind_user(db, user.id)  # todo lo que sigue es de este usuario
         seed_categories(db)
         BUILDERS[state](db)
         db.commit()

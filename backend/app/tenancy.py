@@ -4,7 +4,8 @@ En vez de acordarse de filtrar por dueño en cada consulta (hay decenas), el fil
   - todo SELECT/UPDATE/DELETE de un modelo `Owned` recibe `WHERE user_id = <usuario de la sesión>`;
   - todo objeto nuevo recibe su `user_id` solo (el cliente nunca lo manda);
   - si la sesión no tiene usuario, tocar datos con dueño LANZA ERROR: jamás devuelve "todo".
-El usuario de la sesión se fija en `db.info["user_id"]` (ver deps.get_current_user).
+El usuario de la sesión se fija con `bind_user` (ver deps.get_current_user). En Postgres, RLS (app/rls.py) repite
+el aislamiento dentro de la base de datos: una segunda barrera por si una consulta se saltara este filtro.
 Importar este módulo registra los eventos; app.models lo importa, así que están siempre activos.
 """
 
@@ -65,6 +66,26 @@ def _scope_to_user(state) -> None:
         if table not in top:
             raise TenantError(f"Forma de consulta no soportada sobre {table.name} (subconsulta o alias): no se puede aislar")
         state.statement = state.statement.where(table.c.user_id == user_id)
+
+
+def _set_rls_user(conn, user_id: int) -> None:
+    """Le dice a Postgres de quién es la transacción; las políticas RLS (app/rls.py) leen este valor."""
+    if conn.dialect.name == "postgresql":
+        conn.exec_driver_sql("SELECT set_config('app.user_id', %s, true)", (str(user_id),))  # true = solo esta transacción
+
+
+def bind_user(session: Session, user_id: int) -> None:
+    """Fija el usuario de la sesión: para el filtro de este módulo y para RLS en Postgres."""
+    session.info["user_id"] = user_id
+    if session.in_transaction():  # la transacción ya empezó (p. ej. al leer al usuario): after_begin no la alcanzaría
+        _set_rls_user(session.connection(), user_id)
+
+
+@event.listens_for(Session, "after_begin")
+def _rls_user_on_begin(session: Session, _transaction, connection) -> None:
+    user_id = session.info.get("user_id")
+    if user_id is not None:
+        _set_rls_user(connection, user_id)
 
 
 @event.listens_for(Session, "before_flush")

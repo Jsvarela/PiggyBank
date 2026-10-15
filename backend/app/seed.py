@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.db import SessionLocal
 from app.models import Account, AccountType, Category, CategoryKind, Transaction, TxType, User
 from app.security import hash_password
+from app.tenancy import bind_user
 from app.timeutil import today_bogota
 
 EXPENSE = ["Comida", "Transporte", "Vivienda", "Servicios", "Universidad", "Ocio", "Salud", "Suscripciones", "Otros"]
@@ -64,7 +65,7 @@ def _owner(session: Session) -> User:
 
 if __name__ == "__main__":
     with SessionLocal() as session:
-        session.info["user_id"] = _owner(session).id
+        bind_user(session, _owner(session).id)
         seed_categories(session)
         if "--demo" in sys.argv:
             seed_demo(session)

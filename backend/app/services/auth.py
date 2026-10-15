@@ -11,6 +11,7 @@ from app.models import Invite, User
 from app.security import create_purpose_token, decode_purpose_token, hash_password, verify_password
 from app.seed import seed_categories
 from app.services.backup import wipe_data
+from app.tenancy import bind_user
 
 RESET_MINUTES = 30
 VERIFY_MINUTES = 60 * 24 * 3
@@ -79,7 +80,7 @@ def register(db: Session, email: str, password: str, invite_code: str | None = N
             raise RegistrationClosed("La invitación no es válida, ya se usó o venció")
     db.commit()
     # en producción nadie corre el script de seed: sin categorías no se podría registrar ni un gasto
-    db.info["user_id"] = user.id  # las categorías por defecto son de esta persona
+    bind_user(db, user.id)  # las categorías por defecto son de esta persona
     seed_categories(db)
     return user
 

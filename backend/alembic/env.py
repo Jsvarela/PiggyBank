@@ -21,7 +21,7 @@ from app import models  # noqa: F401  (registra las tablas)
 from app.config import settings
 from app.db import Base
 
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", settings.migration_database_url or settings.database_url)
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -8,8 +9,10 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.config import settings
+from app.db import engine
 from app.errors import Conflict, DomainError, NotFound
 from app.ratelimit import limiter
+from app.rls import warn_if_bypassed
 from app.routers import (
     auth,
     budgets,
@@ -25,7 +28,14 @@ from app.routers import (
 from app.services.auth import RegistrationClosed
 from app.spa import mount_frontend
 
-app = FastAPI(title="Finanzas")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    warn_if_bypassed(engine)
+    yield
+
+
+app = FastAPI(title="Finanzas", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)  # aplica el tope general por IP a toda la API
