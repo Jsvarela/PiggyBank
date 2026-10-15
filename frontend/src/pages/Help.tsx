@@ -65,12 +65,12 @@ const topics: [string, string[]][] = [
 export default function Help() {
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-600">Guía rápida. Toca un tema para ver cómo se hace.</p>
+      <p className="text-base text-slate-600">Guía rápida. Toca un tema para ver cómo se hace.</p>
       <div className="divide-y rounded-xl bg-surface px-4 shadow-sm">
         {topics.map(([title, steps]) => (
           <details key={title} className="group py-3">
-            <summary className="cursor-pointer list-none font-medium after:float-right after:text-slate-400 after:content-['+'] group-open:after:content-['–']">{title}</summary>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+            <summary className="cursor-pointer list-none text-lg font-semibold after:float-right after:text-slate-400 after:content-['+'] group-open:after:content-['–']">{title}</summary>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-base leading-relaxed text-slate-900">
               {steps.map((s) => (
                 <li key={s}>{s}</li>
               ))}
