@@ -5,6 +5,7 @@ import InstallApp from '../components/InstallApp'
 import ThemeToggle from '../components/ThemeToggle'
 
 const links = [
+  ['/ayuda', 'Ayuda rápida', 'Guía sencilla de qué hace cada parte de la app'],
   ['/recurrentes', 'Recurrentes', 'Arriendo, Netflix, salario y próximos pagos'],
   ['/prestamos', 'Préstamos', 'Dinero que le prestaste a otros y cuándo te lo pagan'],
   ['/cuentas', 'Cuentas', 'Efectivo, bancos, billeteras y tarjetas'],
