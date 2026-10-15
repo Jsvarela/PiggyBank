@@ -1,6 +1,7 @@
 import { useDashboard } from '../api/hooks'
 import { formatMonth } from '../lib/format'
 import BudgetAlerts from '../components/BudgetAlerts'
+import LoansSummary from '../components/LoansSummary'
 import Onboarding from '../components/Onboarding'
 import TransactionRow from '../components/TransactionRow'
 import UpcomingList from '../components/UpcomingList'
@@ -51,6 +52,8 @@ export default function Home() {
         <h2 className="mb-2 font-medium">Próximos pagos</h2>
         <UpcomingList limit={5} />
       </section>
+
+      <LoansSummary />
 
       <section className="rounded-xl bg-surface p-4 shadow-sm">
         <h2 className="mb-2 font-medium">Últimos movimientos</h2>
