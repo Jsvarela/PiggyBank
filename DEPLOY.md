@@ -28,10 +28,30 @@ Variables (todas en el panel de Render):
 
 | Variable | Valor |
 | :--- | :--- |
-| `DATABASE_URL` | cadena de Neon |
+| `DATABASE_URL` | cadena de Neon del rol restringido `finanzas_app` (sección 2b) |
+| `MIGRATION_DATABASE_URL` | cadena de Neon del dueño (`neondb_owner`); solo la usan las migraciones |
 | `SECRET_KEY` | aleatoria y larga (la genera Render). Si la cambias, todas las sesiones se cierran |
 | `COOKIE_SECURE` | `true` (la app **se niega a arrancar** en producción con la clave de ejemplo) |
 | `SMTP_*`, `ANALYTICS_URL` | opcionales, ver secciones 6 y 8 |
+
+## 2b. Aislamiento en la base de datos (RLS)
+Además del filtro de la app, Postgres impide por sí mismo que alguien lea filas de otro usuario (Row Level
+Security, migración `d4e8a1b7c203`). **RLS no se aplica al rol por defecto de Neon** (`neondb_owner` se salta
+las políticas), así que la app debe conectarse con otro rol. En el **SQL Editor** de Neon, una sola vez
+(cambia la contraseña) y **después** del primer despliegue con esta migración:
+
+```sql
+CREATE ROLE finanzas_app LOGIN PASSWORD 'una-clave-larga-y-distinta';
+GRANT USAGE ON SCHEMA public TO finanzas_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO finanzas_app;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO finanzas_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO finanzas_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO finanzas_app;
+```
+
+Luego en Render: `MIGRATION_DATABASE_URL` = la cadena actual (dueño) y `DATABASE_URL` = la misma cadena pero con
+usuario `finanzas_app` y su contraseña. Si la app sigue conectada como dueño, arranca igual pero escribe en el
+log `RLS NO está protegiendo` (búscalo en los logs de Render tras desplegar).
 
 ## 3. Instalar en el celular
 - **Android (Chrome):** menú ⋮ → *Instalar app*, o el botón en **Más → Instalar app**.

@@ -28,6 +28,7 @@ def pg(engine):
         c.exec_driver_sql(f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {ROL}")
         c.exec_driver_sql(f"GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO {ROL}")
     yield engine
+    engine.dispose()  # las conexiones devueltas al pool conservan SET ROLE: se descartan para limpiar como dueño
     with engine.begin() as c:
         c.exec_driver_sql(f"DROP OWNED BY {ROL}")
         c.exec_driver_sql(f"DROP ROLE {ROL}")

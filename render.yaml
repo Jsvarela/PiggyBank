@@ -7,6 +7,8 @@ services:
     envVars:
       - key: DATABASE_URL # la cadena de conexión de Neon
         sync: false
+      - key: MIGRATION_DATABASE_URL # Neon, rol dueño (migraciones); DATABASE_URL pasa a ser el rol finanzas_app (DEPLOY.md 2b)
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: COOKIE_SECURE

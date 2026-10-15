@@ -10,7 +10,7 @@ App de finanzas personales, COP, para familia y amigos (~10 personas, cada una c
 5. Seguridad: argon2, JWT en cookie httpOnly/Secure/SameSite, rate limit en login, CORS restringido, secretos en `.env`.
 6. Lógica de negocio en `backend/app/services/`, separada de las rutas. Tests ANTES de implementar.
 7. Interfaz en español.
-8. Todo dato tiene dueño (`user_id`). El filtro es automático en `app/tenancy.py` y falla cerrado (sin usuario en la sesión lanza `TenantError`). No escribas `.where(user_id=…)` a mano ni uses subconsultas/alias sobre tablas con dueño. Registro solo por invitación (el primer usuario es admin).
+8. Todo dato tiene dueño (`user_id`). El filtro es automático en `app/tenancy.py` y falla cerrado (sin usuario en la sesión lanza `TenantError`). No escribas `.where(user_id=…)` a mano ni uses subconsultas/alias sobre tablas con dueño. En Postgres, RLS (`app/rls.py`, `tenancy.bind_user`) repite el aislamiento; un modelo `Owned` nuevo debe añadirse a `rls.TABLES` (lo comprueba un test). Registro solo por invitación (el primer usuario es admin).
 
 ## Comandos
 - Backend (desde `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run uvicorn app.main:app --reload`
