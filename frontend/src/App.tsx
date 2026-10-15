@@ -14,6 +14,7 @@ import Accounts from './pages/Accounts'
 import Help from './pages/Help'
 import Invite from './pages/Invite'
 import Loans from './pages/Loans'
+import Reports from './pages/Reports'
 import Budgets from './pages/Budgets'
 import Categories from './pages/Categories'
 import ForgotPassword from './pages/ForgotPassword'
@@ -75,6 +76,7 @@ function Gate() {
         <Route path="/cuentas" element={<Accounts />} />
         <Route path="/categorias" element={<Categories />} />
         <Route path="/cuenta" element={<Account />} />
+        <Route path="/informes" element={<Reports />} />
         <Route path="/prestamos" element={<Loans />} />
         <Route path="/ayuda" element={<Help />} />
         <Route path="/invitar" element={<Invite />} />

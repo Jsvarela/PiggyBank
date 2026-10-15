@@ -17,3 +17,10 @@ export const formatPercent = (p: number) => (p > 999 ? '>999%' : `${p}%`)
 
 /** `plural(1, 'día', 'días')` -> '1 día'; `plural(2, 'día', 'días')` -> '2 días' */
 export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
+
+/** '2026-12' + 1 -> '2027-01' */
+export function shiftMonth(month: string, delta: number): string {
+  const [y, m] = month.split('-').map(Number)
+  const d = new Date(Date.UTC(y, m - 1 + delta, 1))
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+}

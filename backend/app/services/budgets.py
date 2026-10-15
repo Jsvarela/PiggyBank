@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.errors import DomainError
 from app.models import Budget, Category, CategoryKind, Transaction, TxType
-from app.schemas import BudgetIn, BudgetStatus, CategorySpend, MonthlyReport
+from app.schemas import BudgetIn, BudgetStatus, CategorySpend, MonthlyReport, TrendPoint
 from app.services.balances import month_totals, sum_pesos
 from app.services.catalog import get_or_404
 from app.timeutil import month_range
@@ -90,6 +90,16 @@ def budget_status(db: Session, month: str, today: date) -> list[BudgetStatus]:
             )
         )
     return sorted(items, key=lambda i: i.category_name)
+
+
+def trend(db: Session, month: str, months: int) -> list[TrendPoint]:
+    """Ingresos y gastos de los últimos `months` meses, terminando en `month` (el más viejo primero)."""
+    out, first = [], month_range(parse_month(month))[0]
+    for _ in range(months):
+        income, expense = month_totals(db, *month_range(first))
+        out.append(TrendPoint(month=first.strftime("%Y-%m"), income=income, expense=expense))
+        first = month_range(first - timedelta(days=1))[0]
+    return out[::-1]
 
 
 def monthly_report(db: Session, month: str) -> MonthlyReport:

@@ -177,12 +177,18 @@ class LoanIn(BaseModel):
     expected_amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     due_date: dt.date | None = None
     note: str | None = Field(default=None, max_length=255)
-    paid: bool = False
+    direction: Literal["lent", "borrowed"] = "lent"  # lent = te deben; borrowed = tú debes
+    received: StrictInt = Field(default=0, ge=0, le=MAX_MONEY)  # lo ya cobrado (o pagado, si es deuda tuya)
 
 
 class LoanOut(LoanIn):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    paid: bool
+
+
+class PaymentIn(BaseModel):
+    amount: StrictInt = Field(gt=0, le=MAX_MONEY)
 
 
 class ContributionIn(BaseModel):
@@ -231,6 +237,12 @@ class CategorySpend(BaseModel):
     amount: int
     previous: int
     diff: int
+
+
+class TrendPoint(BaseModel):
+    month: str
+    income: int
+    expense: int
 
 
 class MonthlyReport(BaseModel):

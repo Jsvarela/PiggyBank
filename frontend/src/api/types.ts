@@ -205,8 +205,16 @@ export interface LoanBody {
   expected_amount: number
   due_date: string | null
   note: string | null
-  paid: boolean
+  direction: 'lent' | 'borrowed'
+  received: number
 }
 export interface Loan extends LoanBody {
   id: number
+  paid: boolean
+}
+
+export interface TrendPoint {
+  month: string
+  income: number
+  expense: number
 }

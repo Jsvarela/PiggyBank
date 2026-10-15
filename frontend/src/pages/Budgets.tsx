@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { formatMonth, formatPercent, plural } from '../lib/format'
+import { formatMonth, formatPercent, plural, shiftMonth } from '../lib/format'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -16,12 +16,6 @@ const schema = z.object({
   repeat: z.boolean(),
 })
 type Values = z.infer<typeof schema>
-
-function shiftMonth(month: string, delta: number): string {
-  const [y, m] = month.split('-').map(Number)
-  const d = new Date(Date.UTC(y, m - 1 + delta, 1))
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
-}
 
 const BAR = { ok: 'bg-emerald-500', warning: 'bg-amber-500', exceeded: 'bg-red-600' }
 

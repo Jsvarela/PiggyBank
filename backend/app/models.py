@@ -176,9 +176,9 @@ class SavingsGoal(Owned, Base):
 
 
 class Loan(Owned, Base):
-    """Dinero que le prestaste a alguien. Es solo un recordatorio: no mueve saldos de cuentas."""
+    """Dinero que prestaste (o que te prestaron). Es solo un recordatorio: no mueve saldos de cuentas."""
     __tablename__ = "loans"
-    __table_args__ = (CheckConstraint("amount > 0 AND expected_amount > 0", name="loan_positive"),)
+    __table_args__ = (CheckConstraint("amount > 0 AND expected_amount > 0 AND received >= 0", name="loan_positive"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     person: Mapped[str] = mapped_column(String(100))
@@ -186,7 +186,9 @@ class Loan(Owned, Base):
     expected_amount: Mapped[int] = mapped_column(BigInteger)  # lo que esperas recibir (puede incluir intereses)
     due_date: Mapped[date | None] = mapped_column(Date)
     note: Mapped[str | None] = mapped_column(String(255))
-    paid: Mapped[bool] = mapped_column(default=False)
+    direction: Mapped[str] = mapped_column(String(10), default="lent", server_default="lent")  # lent | borrowed
+    received: Mapped[int] = mapped_column(BigInteger, default=0, server_default="0")  # abonos acumulados
+    paid: Mapped[bool] = mapped_column(default=False)  # derivado: received >= expected_amount
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

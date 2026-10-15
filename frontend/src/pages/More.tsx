@@ -7,7 +7,8 @@ import ThemeToggle from '../components/ThemeToggle'
 const links = [
   ['/ayuda', 'Ayuda rápida', 'Guía sencilla de qué hace cada parte de la app'],
   ['/recurrentes', 'Recurrentes', 'Arriendo, Netflix, salario y próximos pagos'],
-  ['/prestamos', 'Préstamos', 'Dinero que le prestaste a otros y cuándo te lo pagan'],
+  ['/informes', 'Informes', 'Gráficos de en qué gastas y cómo vas mes a mes'],
+  ['/prestamos', 'Préstamos y deudas', 'Lo que te deben, lo que debes y cuándo se paga'],
   ['/cuentas', 'Cuentas', 'Efectivo, bancos, billeteras y tarjetas'],
   ['/categorias', 'Categorías', 'Organiza tus ingresos y gastos'],
   ['/importar', 'Importar extracto', 'Carga movimientos desde un CSV de tu banco'],

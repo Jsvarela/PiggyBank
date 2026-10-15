@@ -25,12 +25,17 @@ const topics: [string, string[]][] = [
     ['Crea una meta (un viaje, un celular, un fondo de emergencia) con el monto que quieres juntar y, si quieres, una fecha.', 'Con «Aportar» pasas plata de una cuenta a la meta. La app te sugiere cuánto ahorrar cada mes.'],
   ],
   [
-    'Préstamos',
+    'Préstamos y deudas',
     [
-      'Sirve para anotar el dinero que le prestaste a alguien: a quién, cuánto prestaste, cuánto esperas recibir y en qué fecha.',
-      'Cuando te paguen, toca «Ya me pagó». Los vencidos se marcan en rojo.',
-      'Es solo un recordatorio: no cambia los saldos de tus cuentas.',
+      'Arriba eliges «Me deben» (dinero que le prestaste a alguien) o «Debo» (lo que le debes a otros).',
+      'Anota la persona, cuánto fue, cuánto se debe devolver y en qué fecha.',
+      'Si te pagan por partes, toca «Abonar» y escribe cuánto. Si pagan todo de una vez, toca «Me pagó todo». La barra muestra cuánto va.',
+      'Lo vencido se marca en rojo y lo pendiente también aparece en Inicio. Es solo un recordatorio: no cambia los saldos de tus cuentas.',
     ],
+  ],
+  [
+    'Informes (gráficos)',
+    ['En Más → Informes ves en qué categorías gastaste más en el mes, con barras fáciles de comparar.', 'Abajo, un gráfico de los últimos 6 meses compara lo que ganaste contra lo que gastaste. Con las flechas cambias de mes.'],
   ],
   [
     'Cuentas',

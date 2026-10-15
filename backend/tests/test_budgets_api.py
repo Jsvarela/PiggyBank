@@ -60,3 +60,18 @@ def test_borrar_presupuesto(authed):
     b = put(authed, category_id=cat["id"], limit_amount=1000).json()
     assert authed.delete(f"/api/budgets/{b['id']}").status_code == 204
     assert authed.delete(f"/api/budgets/{b['id']}").status_code == 404
+
+
+def test_tendencia_de_meses_cruza_el_ano_y_rellena_con_ceros(authed):
+    from tests.test_api import mk_account, mk_category, mk_tx
+
+    a, g, i = mk_account(authed), mk_category(authed), mk_category(authed, kind="income", name="Sueldo")
+    mk_tx(authed, type="expense", amount=30_000, date="2026-01-10", account_id=a["id"], category_id=g["id"])
+    mk_tx(authed, type="income", amount=500_000, date="2025-12-01", account_id=a["id"], category_id=i["id"])
+    r = authed.get("/api/reports/trend?month=2026-02&months=3").json()
+    assert r == [
+        {"month": "2025-12", "income": 500_000, "expense": 0},
+        {"month": "2026-01", "income": 0, "expense": 30_000},
+        {"month": "2026-02", "income": 0, "expense": 0},
+    ]
+    assert authed.get("/api/reports/trend?months=0").status_code == 422

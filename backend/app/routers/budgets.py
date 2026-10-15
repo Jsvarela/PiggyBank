@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.deps import get_current_user
 from app.models import Budget
-from app.schemas import MONTH, BudgetIn, BudgetOut, BudgetStatus, MonthlyReport
+from app.schemas import MONTH, BudgetIn, BudgetOut, BudgetStatus, MonthlyReport, TrendPoint
 from app.services import budgets, catalog
 from app.timeutil import today_bogota
 
@@ -35,6 +35,11 @@ def delete_budget(id: int, db: Session = Depends(get_db)):
 @router.get("/budgets/status", response_model=list[BudgetStatus])
 def status(month: str | None = Query(None, pattern=MONTH), db: Session = Depends(get_db)):
     return budgets.budget_status(db, _month(month), today_bogota())
+
+
+@router.get("/reports/trend", response_model=list[TrendPoint])
+def trend(month: str | None = Query(None, pattern=MONTH), months: int = Query(6, ge=1, le=24), db: Session = Depends(get_db)):
+    return budgets.trend(db, _month(month), months)
 
 
 @router.get("/reports/monthly", response_model=MonthlyReport)

@@ -13,6 +13,7 @@ import type {
   RecurringRule,
   Transaction,
   TransactionFilters,
+  TrendPoint,
   UpcomingPayment,
   User,
 } from './types'
@@ -92,3 +93,5 @@ export const useConfig = () =>
 
 export const useInvites = () => useQuery({ queryKey: ['invites'], queryFn: () => api<Invite[]>('/auth/invites') })
 export const useLoans = () => useQuery({ queryKey: ['loans'], queryFn: () => api<Loan[]>('/loans') })
+export const useTrend = (month: string, months = 6) =>
+  useQuery({ queryKey: ['trend', month, months], queryFn: () => api<TrendPoint[]>(`/reports/trend?month=${month}&months=${months}`) })

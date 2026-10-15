@@ -40,6 +40,7 @@ class BGoal(GoalIn):
 
 class BLoan(LoanIn):
     model_config = _ORM
+    paid: bool = False  # solo para respaldos viejos, que no traían `received`
 
 
 class BRule(RecurringIn):
@@ -122,7 +123,11 @@ def restore_backup(db: Session, b: Backup) -> None:
             data["account_id"] = _ref(acc, g.account_id, "la cuenta")
             goal[g.id] = add(SavingsGoal(**data))
         for ln in b.loans:
-            add(Loan(**ln.model_dump()))
+            data = ln.model_dump()
+            if data["paid"] and data["received"] == 0:
+                data["received"] = data["expected_amount"]
+            data["paid"] = data["received"] >= data["expected_amount"]
+            add(Loan(**data))
         rule = {}
         for r in b.recurring_rules:
             data = r.model_dump(exclude={"id"})
