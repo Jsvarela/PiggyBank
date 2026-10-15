@@ -171,6 +171,20 @@ class GoalOut(GoalIn):
     monthly_suggested: int | None  # None = sin fecha límite
 
 
+class LoanIn(BaseModel):
+    person: str = Field(min_length=1, max_length=100)
+    amount: StrictInt = Field(gt=0, le=MAX_MONEY)
+    expected_amount: StrictInt = Field(gt=0, le=MAX_MONEY)
+    due_date: dt.date | None = None
+    note: str | None = Field(default=None, max_length=255)
+    paid: bool = False
+
+
+class LoanOut(LoanIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
 class ContributionIn(BaseModel):
     amount: StrictInt = Field(gt=0, le=MAX_MONEY)
     from_account_id: int

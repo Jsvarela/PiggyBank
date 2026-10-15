@@ -16,6 +16,7 @@ from app.routers import (
     catalog,
     export,
     goals,
+    loans,
     public,
     recurring,
     statement,
@@ -51,7 +52,7 @@ def health() -> dict[str, str]:
 
 
 for r in (
-    auth.router, catalog.router, transactions.router, budgets.router, recurring.router, goals.router,
+    auth.router, catalog.router, transactions.router, budgets.router, recurring.router, goals.router, loans.router,
     export.router, statement.router, public.router,
 ):
     app.include_router(r, prefix="/api")

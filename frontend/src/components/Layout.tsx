@@ -31,9 +31,10 @@ const TITLES: Record<string, string> = {
   '/categorias': 'Categorías',
   '/importar': 'Importar extracto',
   '/cuenta': 'Cuenta',
+  '/prestamos': 'Préstamos',
   '/invitar': 'Invitar',
 }
-const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar', '/cuenta', '/invitar'])
+const SUBPAGES = new Set(['/recurrentes', '/cuentas', '/categorias', '/importar', '/cuenta', '/prestamos', '/invitar'])
 
 export default function Layout() {
   const { pathname } = useLocation()

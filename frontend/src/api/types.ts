@@ -198,3 +198,15 @@ export interface StatementPreview {
   suggested: CsvMapping | null
   rows: PreviewRow[]
 }
+
+export interface LoanBody {
+  person: string
+  amount: number
+  expected_amount: number
+  due_date: string | null
+  note: string | null
+  paid: boolean
+}
+export interface Loan extends LoanBody {
+  id: number
+}

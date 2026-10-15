@@ -8,12 +8,13 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.errors import DomainError
-from app.models import Account, Budget, Category, RecurringRule, SavingsGoal, Transaction
+from app.models import Account, Budget, Category, Loan, RecurringRule, SavingsGoal, Transaction
 from app.schemas import (
     AccountIn,
     BudgetIn,
     CategoryIn,
     GoalIn,
+    LoanIn,
     RecurringIn,
     TransactionIn,
 )
@@ -37,6 +38,10 @@ class BGoal(GoalIn):
     id: int
 
 
+class BLoan(LoanIn):
+    model_config = _ORM
+
+
 class BRule(RecurringIn):
     model_config = _ORM
     id: int
@@ -58,6 +63,7 @@ class Backup(BaseModel):
     accounts: list[BAccount]
     categories: list[BCategory]
     goals: list[BGoal]
+    loans: list[BLoan] = []  # los respaldos viejos no lo traen
     recurring_rules: list[BRule]
     transactions: list[BTransaction]
     budgets: list[BBudget]
@@ -72,6 +78,7 @@ def export_backup(db: Session) -> Backup:
         accounts=rows(Account, BAccount),
         categories=rows(Category, BCategory),
         goals=rows(SavingsGoal, BGoal),
+        loans=rows(Loan, BLoan),
         recurring_rules=rows(RecurringRule, BRule),
         transactions=[BTransaction.model_validate(t) for t in db.scalars(select(Transaction).order_by(Transaction.date, Transaction.created_at))],
         budgets=rows(Budget, BBudget),
@@ -88,7 +95,7 @@ def _ref(ids: dict[int, int], old: int | None, what: str) -> int | None:
 
 def wipe_data(db: Session) -> None:
     """Borra todos los datos financieros (no el usuario), en orden de dependencias. No hace commit."""
-    for model in (Transaction, Budget, RecurringRule, SavingsGoal, Category, Account):
+    for model in (Transaction, Budget, RecurringRule, SavingsGoal, Loan, Category, Account):
         db.execute(delete(model))
 
 
@@ -114,6 +121,8 @@ def restore_backup(db: Session, b: Backup) -> None:
             data = g.model_dump(exclude={"id"})
             data["account_id"] = _ref(acc, g.account_id, "la cuenta")
             goal[g.id] = add(SavingsGoal(**data))
+        for ln in b.loans:
+            add(Loan(**ln.model_dump()))
         rule = {}
         for r in b.recurring_rules:
             data = r.model_dump(exclude={"id"})

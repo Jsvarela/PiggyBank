@@ -6,6 +6,7 @@ import ThemeToggle from '../components/ThemeToggle'
 
 const links = [
   ['/recurrentes', 'Recurrentes', 'Arriendo, Netflix, salario y próximos pagos'],
+  ['/prestamos', 'Préstamos', 'Dinero que le prestaste a otros y cuándo te lo pagan'],
   ['/cuentas', 'Cuentas', 'Efectivo, bancos, billeteras y tarjetas'],
   ['/categorias', 'Categorías', 'Organiza tus ingresos y gastos'],
   ['/importar', 'Importar extracto', 'Carga movimientos desde un CSV de tu banco'],

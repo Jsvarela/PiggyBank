@@ -175,6 +175,21 @@ class SavingsGoal(Owned, Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class Loan(Owned, Base):
+    """Dinero que le prestaste a alguien. Es solo un recordatorio: no mueve saldos de cuentas."""
+    __tablename__ = "loans"
+    __table_args__ = (CheckConstraint("amount > 0 AND expected_amount > 0", name="loan_positive"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    person: Mapped[str] = mapped_column(String(100))
+    amount: Mapped[int] = mapped_column(BigInteger)  # lo que prestaste
+    expected_amount: Mapped[int] = mapped_column(BigInteger)  # lo que esperas recibir (puede incluir intereses)
+    due_date: Mapped[date | None] = mapped_column(Date)
+    note: Mapped[str | None] = mapped_column(String(255))
+    paid: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Transaction(Owned, Base):
     __tablename__ = "transactions"
     __table_args__ = (

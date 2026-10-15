@@ -8,6 +8,7 @@ import type {
   Dashboard,
   Goal,
   Invite,
+  Loan,
   MonthlyReport,
   RecurringRule,
   Transaction,
@@ -90,3 +91,4 @@ export const useConfig = () =>
   })
 
 export const useInvites = () => useQuery({ queryKey: ['invites'], queryFn: () => api<Invite[]>('/auth/invites') })
+export const useLoans = () => useQuery({ queryKey: ['loans'], queryFn: () => api<Loan[]>('/loans') })
