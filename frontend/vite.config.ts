@@ -10,8 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Finanzas',
-        short_name: 'Finanzas',
+        name: 'PiggyBank',
+        short_name: 'PiggyBank',
         description: 'Mis finanzas personales',
         lang: 'es',
         start_url: '/',

@@ -1,4 +1,4 @@
-# Finanzas
+# PiggyBank
 
 PWA de finanzas personales. Backend FastAPI (`backend/`), frontend React + Vite (`frontend/`).
 

@@ -1,4 +1,4 @@
-# Finanzas personales (PWA + FastAPI)
+# PiggyBank: finanzas personales (PWA + FastAPI)
 
 App de finanzas personales, COP, para familia y amigos (~10 personas, cada una con sus datos, por invitación). Plan completo: `prompt-app-gastos-claude-code.md`.
 

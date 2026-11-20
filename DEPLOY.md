@@ -91,7 +91,7 @@ Variables en Render (todas opcionales; basta con `SMTP_HOST` para activar la fun
 | `SMTP_HOST` | servidor SMTP |
 | `SMTP_PORT` | `587` (STARTTLS, por defecto) |
 | `SMTP_USER` / `SMTP_PASSWORD` | credenciales SMTP |
-| `SMTP_FROM` | remitente, p. ej. `Finanzas <tucorreo@gmail.com>` |
+| `SMTP_FROM` | remitente, p. ej. `PiggyBank <tucorreo@gmail.com>` |
 | `APP_URL` | solo si usas dominio propio; en Render se toma sola |
 
 ## 7. Olvidé mi contraseña y no tengo correo configurado

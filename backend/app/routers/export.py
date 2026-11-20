@@ -20,7 +20,7 @@ def export_csv(db: Session = Depends(get_db)):
 
 @router.get("/export/backup.json")
 def export_backup(db: Session = Depends(get_db)):
-    return _download(backup.export_backup(db).model_dump_json(), "application/json", "finanzas-respaldo.json")
+    return _download(backup.export_backup(db).model_dump_json(), "application/json", "piggybank-respaldo.json")
 
 
 @router.post("/import/backup")

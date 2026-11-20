@@ -108,7 +108,7 @@ def _link(path: str, token: str) -> str:
 def reset_message(user: User) -> tuple[str, str, str]:
     token = create_purpose_token(user.id, "reset", user.token_version, RESET_MINUTES)
     body = (
-        "Pediste restablecer tu contraseña de Finanzas.\n\n"
+        "Pediste restablecer tu contraseña de PiggyBank.\n\n"
         f"Abre este enlace (vale {RESET_MINUTES} minutos y sirve una sola vez):\n{_link('restablecer', token)}\n\n"
         "Si no fuiste tú, ignora este correo: tu contraseña no cambia."
     )

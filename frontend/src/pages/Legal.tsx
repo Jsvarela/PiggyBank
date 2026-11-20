@@ -8,7 +8,7 @@ export function Privacy() {
     <PublicPage title="Política de privacidad">
       <div className="space-y-4 text-sm leading-relaxed">
         <p>
-          <b>Finanzas</b> es una app de finanzas personales. Quien la despliega y administra es la persona responsable de los datos que se guardan en esa instalación. Solo se entra por invitación de quien administra.
+          <b>PiggyBank</b> es una app de finanzas personales. Quien la despliega y administra es la persona responsable de los datos que se guardan en esa instalación. Solo se entra por invitación de quien administra.
         </p>
         <section>
           <h2 className="font-semibold">Qué ven las demás personas</h2>
@@ -63,7 +63,7 @@ export function Terms() {
       <div className="space-y-4 text-sm leading-relaxed">
         <section>
           <h2 className="font-semibold">Qué es y qué no es</h2>
-          <p>Finanzas te ayuda a llevar el control de tu dinero. No es asesoría financiera, contable ni tributaria, ni se conecta a tu banco: los saldos salen de lo que tú registras.</p>
+          <p>PiggyBank te ayuda a llevar el control de tu dinero. No es asesoría financiera, contable ni tributaria, ni se conecta a tu banco: los saldos salen de lo que tú registras.</p>
         </section>
         <section>
           <h2 className="font-semibold">Uso</h2>

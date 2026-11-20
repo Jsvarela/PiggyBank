@@ -88,7 +88,7 @@ export default function Layout() {
                   ‹ Más
                 </Link>
               )}
-              <h1 className="font-semibold">{TITLES[pathname] ?? 'Finanzas'}</h1>
+              <h1 className="font-semibold">{TITLES[pathname] ?? 'PiggyBank'}</h1>
             </span>
             <button
               className="text-sm text-slate-600"
